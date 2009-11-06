@@ -854,6 +854,12 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				a_register += (read_memory(indexed_indirect(*p)) + temp);
 				cycles -= 6;
 				break;
+			case 0x71 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(indirect_indexed(*p)) + get_carry_flag());
+				a_register += (read_memory(indirect_indexed(*p)) + temp);
+				cycles -= 5 + (indirect_indexed(*p) > PAGE_SIZE ? 1 : 0);
+				break;
 			default : break;
 		}
 
@@ -926,7 +932,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	XAS = (0x9B . extend . extend @{arg_count = 2;}) @logical_and_x_with_accumulator_store_in_stack;
 
 	#arithmetic instuctions
-	ADC = ((((0x69 | 0x65 | 0x75 | 0x61) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
+	ADC = ((((0x69 | 0x65 | 0x75 | 0x61 | 0x71) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
 
 
   Lexecute = (
