@@ -86,8 +86,8 @@ short indirect(unsigned char most_sig_byte, unsigned char least_sig_byte){
 }
 
 short indexed_indirect(unsigned char zero_page_address){
-  unsigned char least_sig_byte = read_memory(zero_page_address);
-  return ((x_register + least_sig_byte));
+  unsigned char least_sig_byte = read_memory(zero_page_address + x_register);
+  return (least_sig_byte);
 }
 
 short indirect_indexed(unsigned char zero_page_address){
@@ -763,7 +763,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				cycles -= 5;
 				break;
 			case 0x93 :
-				write_memory(indexed_indirect(*p),temp);
+				write_memory(indirect_indexed(*p),temp);
 				cycles -= 6;
 		}
 	}
@@ -836,6 +836,24 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				a_register += (read_memory(absolute(*p,*(p-1))) + temp);
 				cycles -= 4;
 				break;
+			case 0x7D :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(absolute_x(*p,*(p-1))) + get_carry_flag());
+				a_register += (read_memory(absolute_x(*p,*(p-1))) + temp);
+				cycles -= 4 + (absolute_x(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0x79 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(absolute_y(*p,*(p-1))) + get_carry_flag());
+				a_register += (read_memory(absolute_y(*p,*(p-1))) + temp);
+				cycles -= 4 + (absolute_y(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0x61 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(indexed_indirect(*p)) + get_carry_flag());
+				a_register += (read_memory(indexed_indirect(*p)) + temp);
+				cycles -= 6;
+				break;
 			default : break;
 		}
 
@@ -891,7 +909,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	PLP = (0x28 @{arg_count = 0;}) @pull_status;
 
 	#logical instructions
-  	AND = (((0x29 | 0x25 | 0x35 | 0x21 | 0x31) . extend) @{arg_count = 1;} | ((0x2D | 0x3D | 0x39) . extend . extend) @{arg_count = 2;}) @logical_and;
+  AND = (((0x29 | 0x25 | 0x35 | 0x21 | 0x31) . extend) @{arg_count = 1;} | ((0x2D | 0x3D | 0x39) . extend . extend) @{arg_count = 2;}) @logical_and;
 	EOR = (((0x49 | 0x45 | 0x55 | 0x41 | 0x51) . extend) @{arg_count = 1;} | ((0x4D | 0x5D | 0x59) . extend . extend) @{arg_count = 2;}) @logical_eor;
 	ORA = (((0x09 | 0x05 | 0x15 | 0x01 | 0x11) . extend) @{arg_count = 1;} | ((0x0D | 0x1D | 0x19) . extend . extend) @{arg_count = 2;}) @logical_ora;
 	BIT = ((0x24 . extend) @{arg_count = 1;} | (0x2C . extend . extend) @{arg_count = 2;}) @logical_bit;
@@ -908,7 +926,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	XAS = (0x9B . extend . extend @{arg_count = 2;}) @logical_and_x_with_accumulator_store_in_stack;
 
 	#arithmetic instuctions
-	ADC = (( ( (0x69 | 0x65 | 0x75) . extend) @{arg_count = 1;}) | (0x6D) . extend . extend) @add;
+	ADC = ((((0x69 | 0x65 | 0x75 | 0x61) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
 
 
   Lexecute = (

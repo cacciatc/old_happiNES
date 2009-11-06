@@ -26,13 +26,13 @@ class AXATest < Test::Unit::TestCase
 	end
 	
 	def test_addr_mode_indirect_y
-		instr = [0xA9,0x77,0xA2,0x07,0xA0,0x00,0x93,0x07]
+		instr = [0xA9,0x77,0xA2,0x07,0xA0,0x00,0x93,0x00]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("07",fstring[$m_line].split(" ")[8])
+		assert_equal("07",fstring[$m_line].split(" ")[1])
 		
 		instr = [0xA9,0x00,0xA2,0x40,0xA0,0x00,0x93,0x00]
 		write_input_file(instr)
