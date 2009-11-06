@@ -1,0 +1,42 @@
+-Why?-
+	Although there are a lot of NES emulators available I still felt the need to start building one because:
+		-A few years ago I would never thought I would be smart enough or have the necessary skills to do so.
+		-I wanted an excuse to use Ragel for a project.
+		-If this project goes well, I am interested in providing better network support, since that seems to be lacking in most of the NES emulators I have used.
+
+-Version-
+	0.1
+
+-Roadmap-
+	Following is a general guideline leading up to version 1.0:
+		-0.1  Support all 6502 instructions including undocumented opcodes.
+		-0.2  Complete 2a03 core (including sound).
+		-0.3  Complete PPU (Picture Processing Unit).
+		-0.4  Support iNES ROMS and certain MMUs.
+		-0.5  GUI.
+		-0.6  Savestate functionality.
+		-0.7  Recording.
+		-0.8  Networking.
+		-0.9  ROM support check.
+		-1.0  Fully functional emulator.
+
+-Running-
+	"ruby make.rb"
+		-Uses Ragel on 2a03.rl to create 2a03.c
+		-Compiles 2a03.c and creates an executable for testing called 2a03.
+		-Runs the test suites in the tests dir.
+
+-License-
+	Please check the license file for more information.
+
+-Directory Contents-
+/src
+	-Contains Ragel source files
+/tests
+	-Contains test files broken into suites based on instruction type as well as a few general categories.
+README
+	-This file.
+LICENSE
+	-Licensing file.
+make.rb
+	-Ruby script that compiles CPU core and then runs tests.
