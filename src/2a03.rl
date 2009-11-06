@@ -867,6 +867,66 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_overflow(a_register);
 		check_for_negative(a_register);
 	}
+	action subtract {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+    switch(current_op){
+			case 0xE9 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,*p - (1 - get_carry_flag()));
+				a_register -= ( (*p) - (1 - temp));
+				cycles -= 2;
+				break;
+			case 0xE5 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(zero_page(*p)) - (1-get_carry_flag()));
+				a_register -= (read_memory(zero_page(*p)) - (1 - temp));
+				cycles -= 3;
+				break;
+			case 0xF5 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(zero_page_x(*p)) -(1 - get_carry_flag()));
+				a_register -= (read_memory(zero_page_x(*p)) - (1-temp));
+				cycles -= 4;
+				break;
+			case 0xED :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(absolute(*p,*(p-1))) - (1- get_carry_flag()));
+				a_register -= (read_memory(absolute(*p,*(p-1))) - (1-temp));
+				cycles -= 4;
+				break;
+			case 0xFD :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(absolute_x(*p,*(p-1))) - (1- get_carry_flag()));
+				a_register -= (read_memory(absolute_x(*p,*(p-1))) -(1- temp));
+				cycles -= 4 + (absolute_x(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0xF9 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(absolute_y(*p,*(p-1))) - (1- get_carry_flag()));
+				a_register -= (read_memory(absolute_y(*p,*(p-1))) - (1-temp));
+				cycles -= 4 + (absolute_y(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0xE1 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(indexed_indirect(*p)) - (1- get_carry_flag()));
+				a_register -= (read_memory(indexed_indirect(*p)) -(1- temp));
+				cycles -= 6;
+				break;
+			case 0xF1 :
+				temp = get_carry_flag();
+				check_for_carry(a_register,read_memory(indirect_indexed(*p)) -(1- get_carry_flag()));
+				a_register -= (read_memory(indirect_indexed(*p)) -(1-temp));
+				cycles -= 5 + (indirect_indexed(*p) > PAGE_SIZE ? 1 : 0);
+				break;
+			default : break;
+		}
+
+		check_for_zero(a_register);
+		check_for_overflow(a_register);
+		check_for_negative(a_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -933,7 +993,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 	#arithmetic instuctions
 	ADC = ((((0x69 | 0x65 | 0x75 | 0x61 | 0x71) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
-
+	SBC = ((((0xE9 | 0xE5 | 0xF5 | 0xE1 | 0xF1) . extend) @{arg_count = 1;}) | ((0xED | 0xFD | 0xF9) . extend . extend) @{arg_count = 2;}) @subtract;
 
   Lexecute = (
     #system functions
@@ -947,7 +1007,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#logical instructions
 		AND | EOR | ORA | BIT | AAC | AAX | ARR | ASR | ATX | AXA | AXS | LAR | SXA | SYA | XAS |
 		#arithmetic instructions
-		ADC
+		ADC | SBC
   );
     
   main := (Lexecute @cyclic_tasks)+;
