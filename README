@@ -40,3 +40,8 @@ LICENSE
 	-Licensing file.
 make.rb
 	-Ruby script that compiles CPU core and then runs tests.
+
+-Resources-
+	We are currently using the following sites for opcode specs:
+		-http://www.obelisk.demon.co.uk/6502/
+		-http://nesdev.parodius.com/undocumented_opcodes.txt
