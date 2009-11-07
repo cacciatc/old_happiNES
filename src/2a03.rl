@@ -927,6 +927,142 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_overflow(a_register);
 		check_for_negative(a_register);
 	}
+	action compare {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+    switch(current_op){
+			case 0xC9 :
+				if(a_register >= *p){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == *p){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 2;
+				break;
+			case 0xC5 :
+				temp = read_memory(zero_page(*p));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 3;
+				break;
+			case 0xD5 :
+				temp = read_memory(zero_page_x(*p));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 4;
+				break;
+			case 0xCD :
+				temp = read_memory(absolute(*p,*(p-1)));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 4;
+				break;
+			case 0xDD :
+				temp = read_memory(absolute_x(*p,*(p-1)));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 4 + (absolute_x(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0xD9 :
+				temp = read_memory(absolute_y(*p,*(p-1)));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 4 + (absolute_y(*p,*(p-1)) > PAGE_SIZE ? 1 : 0);
+				break;
+			case 0xC1 :
+				temp = read_memory(indexed_indirect(*p));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 6;
+				break;
+			case 0xD1 :
+				temp = read_memory(indirect_indexed(*p));
+				if(a_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(a_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 5 + (indirect_indexed(*p) > PAGE_SIZE ? 1 : 0);
+				break;
+			default : break;
+		}
+		check_for_negative(a_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -994,6 +1130,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	#arithmetic instuctions
 	ADC = ((((0x69 | 0x65 | 0x75 | 0x61 | 0x71) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
 	SBC = ((((0xE9 | 0xE5 | 0xF5 | 0xE1 | 0xF1) . extend) @{arg_count = 1;}) | ((0xED | 0xFD | 0xF9) . extend . extend) @{arg_count = 2;}) @subtract;
+	CMP = ((((0xC9 | 0xC5 | 0xD5 | 0xC1 | 0xD1) . extend) @{arg_count = 1;}) | ((0xCD | 0xDD | 0xD9) . extend . extend) @{arg_count = 2;}) @compare;
 
   Lexecute = (
     #system functions
@@ -1007,7 +1144,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#logical instructions
 		AND | EOR | ORA | BIT | AAC | AAX | ARR | ASR | ATX | AXA | AXS | LAR | SXA | SYA | XAS |
 		#arithmetic instructions
-		ADC | SBC
+		ADC | SBC | CMP
   );
     
   main := (Lexecute @cyclic_tasks)+;
