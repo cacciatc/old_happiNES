@@ -1063,6 +1063,62 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		}
 		check_for_negative(a_register);
 	}
+	action compare_x {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+    switch(current_op){
+			case 0xE0 :
+				if(x_register >= *p){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(x_register == *p){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 2;				
+				break;			
+			case 0xE4 : 
+				temp = read_memory(zero_page(*p));
+				if(x_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(x_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 3;
+				break;
+			case 0xEC :
+				temp = read_memory(absolute(*p,*(p-1)));
+				if(x_register >= temp){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				if(x_register == temp){
+					set_zero_flag();
+				}
+				else{
+					clear_zero_flag();
+				}
+				cycles -= 4;
+				break;
+			default : break;
+		}
+			check_for_negative(x_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1131,6 +1187,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	ADC = ((((0x69 | 0x65 | 0x75 | 0x61 | 0x71) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
 	SBC = ((((0xE9 | 0xE5 | 0xF5 | 0xE1 | 0xF1) . extend) @{arg_count = 1;}) | ((0xED | 0xFD | 0xF9) . extend . extend) @{arg_count = 2;}) @subtract;
 	CMP = ((((0xC9 | 0xC5 | 0xD5 | 0xC1 | 0xD1) . extend) @{arg_count = 1;}) | ((0xCD | 0xDD | 0xD9) . extend . extend) @{arg_count = 2;}) @compare;
+	CPX = (((0xE0 | 0xE4) . extend @{arg_count = 1;}) | ((0xEC) . extend . extend @{arg_count = 2;})) @compare_x;
 
   Lexecute = (
     #system functions
@@ -1144,7 +1201,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#logical instructions
 		AND | EOR | ORA | BIT | AAC | AAX | ARR | ASR | ATX | AXA | AXS | LAR | SXA | SYA | XAS |
 		#arithmetic instructions
-		ADC | SBC | CMP
+		ADC | SBC | CMP | CPX
   );
     
   main := (Lexecute @cyclic_tasks)+;
