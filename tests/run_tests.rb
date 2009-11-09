@@ -4,6 +4,7 @@ require 'stack_ops/stack_ops'
 require 'logical/logical'
 require 'arithmetic/arithmetic'
 require 'incs_decs/incs_decs'
+require 'jumps_calls/jumps_calls'
 
 $a_line = 0
 $x_line = 1

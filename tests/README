@@ -3,6 +3,7 @@ This directory contains the following:
 algorithms - tests general algorithms and measures performance
 arithmetic - tests for arithmetic instructions
 incs_decs - tests increment and decrement instructions
+jumps_calls - tests jump and call instructions
 load_store - tests for load and store instructions
 logical - tests for logical instructions
 stack_ops - tests for stack instructions

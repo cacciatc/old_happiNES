@@ -6,6 +6,7 @@
 #define MY_STACK_SIZE 256
 #define RAM_SIZE 65535
 #define STACK_OFFSET 4096 //7FFFF?
+#define ROM_START 0x8000
 
 #define IRQ 65534
 
@@ -35,6 +36,11 @@ int cycles    = 0;
 unsigned char current_op= 0;
 /*used for timing*/
 int interrupt_period = 100;
+
+/*used to perform jumps*/
+int is_jump_planned;
+int* jump_address;
+
 
 /*memory functions*/
 int read_memory(short address){
@@ -70,19 +76,28 @@ short relative(char offset){
 }
 
 short absolute(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(2^8)) + least_sig_byte);
+  return ((most_sig_byte*(256)) + least_sig_byte);
 }
 short absolute_x(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(2^8)) + least_sig_byte + x_register);
+  return ((most_sig_byte*(256)) + least_sig_byte + x_register);
 }
 short absolute_y(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(2^8)) + least_sig_byte + y_register);
+  return ((most_sig_byte*(256)) + least_sig_byte + y_register);
 }
 
 short indirect(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  unsigned char address_least = read_memory((most_sig_byte*(2^8)) + least_sig_byte);
-  unsigned char address_most = read_memory((most_sig_byte*(2^8)) + least_sig_byte + 1);
-  return ((address_most*(2^8)) + address_least);
+  unsigned char address_least;
+  unsigned char address_most;
+	/*reproduce page boundary bug for original 6502 chips*/	
+	if(least_sig_byte == 0xFF){
+ 		address_least = read_memory(0x00FF);
+ 	 	address_most = read_memory(0x00);
+	}
+	else{
+ 		address_least = read_memory((most_sig_byte*(256)) + least_sig_byte);
+ 	 	address_most = read_memory((most_sig_byte*(256)) + least_sig_byte + 1);
+	}
+  return ((address_most*(256)) + address_least);
 }
 
 short indexed_indirect(unsigned char zero_page_address){
@@ -92,7 +107,11 @@ short indexed_indirect(unsigned char zero_page_address){
 
 short indirect_indexed(unsigned char zero_page_address){
   unsigned char least_sig_byte = read_memory(zero_page_address);
-  return ((y_register*(2^8)) + least_sig_byte);
+  return ((y_register*(256)) + least_sig_byte);
+}
+void schedule_jump(short address){
+	is_jump_planned = 1;
+	jump_address = (m + address + ROM_START);
 }
 
 /*status functions*/
@@ -1328,21 +1347,48 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_negative(temp);
 		check_for_zero(temp);
 	}
+
+	##jumps and calls
+	action jump {
+		unsigned int temp;
+		current_op = *(p-arg_count);
+
+		switch(current_op){
+			case 0x4C :
+				schedule_jump(absolute(*p,*(p-1)));
+				cycles -= 3;
+				break;
+			case 0x6C :
+				schedule_jump(indirect(*p,*(p-1)));
+				cycles -= 5;
+				break;
+			default : break;
+		}
+	}
   
   #special actions
   action cyclic_tasks {
-    /*debug code*/
+		/*debug code*/
     /*int i;
+		printf("[0x%.4X] ",p-arg_count);
     for(i = arg_count; i >= 0;i--){
       printf("0x%.4X ",*(p-i));
     }
     printf("\n");*/
     /*end*/
+		
     if(cycles <= 0){
       cycles += interrupt_period;
     }
-    if(p >= pe)
+    if(p >= pe){
       exit(0);
+		}
+		/*perform any scheduled jumps*/
+		if(is_jump_planned){
+			is_jump_planned = 0;
+			p = jump_address;
+			fexec p;
+		}
   }
  
   #system functions
@@ -1408,6 +1454,11 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	DEY = (0x88 @{arg_count = 0;}) @dec_y;
 	DCP = (((0xC7 | 0xD7 | 0xC3 | 0xD3) . extend @{arg_count = 1;}) | ((0xCF | 0xDF | 0xDB) . extend . extend @{arg_count = 2;})) @dcp;
 
+	#jumps and calls
+	JMP = ((0x4C | 0x6C) . extend . extend @{arg_count = 2;}) @jump;
+
+	KIL = (0x02) @{exit(0);};
+
   Lexecute = (
     #system functions
     NOP | DOP | TOP | BRK | RTI |
@@ -1422,7 +1473,9 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#arithmetic instructions
 		ADC | SBC | CMP | CPX | CPY |
 		#increments and decrements
-		INC | INX | INY | DEC | DEX | DEY | DCP
+		INC | INX | INY | DEC | DEX | DEY | DCP |
+		#jumps and calls
+		JMP
   );
     
   main := (Lexecute @cyclic_tasks)+;
@@ -1500,12 +1553,12 @@ int load_it(char *fname){
 		printf("Unable to open input file!\n");
 		exit(1);
 	}
-	
+
 	fseek(fp,0,SEEK_END);
   fsize = ftell(fp);
 	fseek(fp,0,SEEK_SET);
-  p = (unsigned char*)malloc(sizeof(unsigned char) * fsize);
-  fread(p,sizeof(unsigned char),fsize,fp);
+  fread(&m[ROM_START],sizeof(unsigned char),fsize,fp);
+	p = &m[ROM_START];
 	pe = p + fsize;
   fclose(fp);
 	return fsize;
@@ -1515,18 +1568,17 @@ int main(int argc,char** argv){
   if(argc > 2){
 		/*init*/
 		cycles = interrupt_period;
-		status = 0;
+		status    = 0;
 		arg_count = 0;
+		is_jump_planned = 0;
 		pstack = MY_STACK_SIZE-1;
 	
 		%%write init;
-		
+
 		load_it(argv[1]);
-		//unsigned char test[] = {0xA9,0x00};
-		//p = test;
-		//pe = test+2;
+
 		%%write exec;
-		//dump_mem();
+
 		pack_it(argv[2]);
 	}
   return 0;
