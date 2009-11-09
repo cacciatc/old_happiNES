@@ -1230,6 +1230,40 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_negative(y_register);
 		check_for_zero(y_register);
 	}
+	action dec {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+		switch(current_op){
+			case 0xC6 :
+				temp = read_memory(zero_page(*p));
+				temp--;				
+				write_memory(zero_page(*p),temp);
+				cycles -= 5;
+				break;
+			case 0xD6 :
+				temp = read_memory(zero_page_x(*p));
+				temp--;				
+				write_memory(zero_page_x(*p),temp);
+				cycles -= 6;
+				break;
+			case 0xCE :
+				temp = read_memory(absolute(*p,*(p-1)));
+				temp--;				
+				write_memory(absolute(*p,*(p-1)),temp);
+				cycles -= 6;
+				break;
+			case 0xDE :
+				temp = read_memory(absolute_x(*p,*(p-1)));
+				temp--;				
+				write_memory(absolute_x(*p,*(p-1)),temp);
+				cycles -= 7;
+				break;
+			default : break;
+		}
+		check_for_negative(temp);
+		check_for_zero(temp);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1305,6 +1339,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	INC = (((0xE6 | 0xF6) . extend @{arg_count = 1;}) | ((0xEE | 0xFE) . extend . extend @{arg_count = 2;})) @inc;
 	INX = (0xE8 @{arg_count = 0;}) @inc_x;
 	INY = (0xC8 @{arg_count = 0;}) @inc_y;
+	DEC = (((0xC6 | 0xD6) . extend @{arg_count = 1;}) | ((0xCE | 0xDE) . extend . extend @{arg_count = 2;})) @dec;
 
   Lexecute = (
     #system functions
@@ -1320,7 +1355,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#arithmetic instructions
 		ADC | SBC | CMP | CPX | CPY |
 		#increments and decrements
-		INC | INX | INY
+		INC | INX | INY | DEC
   );
     
   main := (Lexecute @cyclic_tasks)+;
