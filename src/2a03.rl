@@ -1276,6 +1276,58 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_negative(y_register);
 		check_for_zero(y_register);
 	}
+	action dcp {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+		switch(current_op){
+			case 0xC7 :
+				temp = read_memory(zero_page(*p));
+				temp--;				
+				write_memory(zero_page(*p),temp);
+				cycles -= 5;
+				break;
+			case 0xD7 :
+				temp = read_memory(zero_page_x(*p));
+				temp--;				
+				write_memory(zero_page_x(*p),temp);
+				cycles -= 6;
+				break;
+			case 0xCF :
+				temp = read_memory(absolute(*p,*(p-1)));
+				temp--;				
+				write_memory(absolute(*p,*(p-1)),temp);
+				cycles -= 6;
+				break;
+			case 0xDF :
+				temp = read_memory(absolute_x(*p,*(p-1)));
+				temp--;				
+				write_memory(absolute_x(*p,*(p-1)),temp);
+				cycles -= 7;
+				break;
+			case 0xDB :
+				temp = read_memory(absolute_y(*p,*(p-1)));
+				temp--;				
+				write_memory(absolute_y(*p,*(p-1)),temp);
+				cycles -= 7;
+				break;
+			case 0xC3 :
+				temp = read_memory(indexed_indirect(*p));
+				temp--;				
+				write_memory(indexed_indirect(*p),temp);
+				cycles -= 8;
+				break;
+			case 0xD3 :
+				temp = read_memory(indirect_indexed(*p));
+				temp--;				
+				write_memory(indirect_indexed(*p),temp);
+				cycles -= 8;
+				break;
+			default : break;
+		}
+		check_for_negative(temp);
+		check_for_zero(temp);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1354,6 +1406,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	DEC = (((0xC6 | 0xD6) . extend @{arg_count = 1;}) | ((0xCE | 0xDE) . extend . extend @{arg_count = 2;})) @dec;
 	DEX = (0xCA @{arg_count = 0;}) @dec_x;
 	DEY = (0x88 @{arg_count = 0;}) @dec_y;
+	DCP = (((0xC7 | 0xD7 | 0xC3 | 0xD3) . extend @{arg_count = 1;}) | ((0xCF | 0xDF | 0xDB) . extend . extend @{arg_count = 2;})) @dcp;
 
   Lexecute = (
     #system functions
@@ -1369,7 +1422,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#arithmetic instructions
 		ADC | SBC | CMP | CPX | CPY |
 		#increments and decrements
-		INC | INX | INY | DEC | DEX | DEY
+		INC | INX | INY | DEC | DEX | DEY | DCP
   );
     
   main := (Lexecute @cyclic_tasks)+;
