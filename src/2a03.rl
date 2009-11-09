@@ -1264,6 +1264,18 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_negative(temp);
 		check_for_zero(temp);
 	}
+	action dec_x {			
+		x_register--;
+		cycles -= 2;
+		check_for_negative(x_register);
+		check_for_zero(x_register);
+	}
+	action dec_y {			
+		y_register--;
+		cycles -= 2;
+		check_for_negative(y_register);
+		check_for_zero(y_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1340,6 +1352,8 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	INX = (0xE8 @{arg_count = 0;}) @inc_x;
 	INY = (0xC8 @{arg_count = 0;}) @inc_y;
 	DEC = (((0xC6 | 0xD6) . extend @{arg_count = 1;}) | ((0xCE | 0xDE) . extend . extend @{arg_count = 2;})) @dec;
+	DEX = (0xCA @{arg_count = 0;}) @dec_x;
+	DEY = (0x88 @{arg_count = 0;}) @dec_y;
 
   Lexecute = (
     #system functions
@@ -1355,7 +1369,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#arithmetic instructions
 		ADC | SBC | CMP | CPX | CPY |
 		#increments and decrements
-		INC | INX | INY | DEC
+		INC | INX | INY | DEC | DEX | DEY
   );
     
   main := (Lexecute @cyclic_tasks)+;
