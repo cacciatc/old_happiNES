@@ -1304,6 +1304,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	#increments and decrements
 	INC = (((0xE6 | 0xF6) . extend @{arg_count = 1;}) | ((0xEE | 0xFE) . extend . extend @{arg_count = 2;})) @inc;
 	INX = (0xE8 @{arg_count = 0;}) @inc_x;
+	INY = (0xC8 @{arg_count = 0;}) @inc_y;
 
   Lexecute = (
     #system functions
@@ -1319,7 +1320,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#arithmetic instructions
 		ADC | SBC | CMP | CPX | CPY |
 		#increments and decrements
-		INC | INX
+		INC | INX | INY
   );
     
   main := (Lexecute @cyclic_tasks)+;
