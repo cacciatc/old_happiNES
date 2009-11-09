@@ -878,6 +878,13 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				a_register -= ( (*p) - (1 - temp));
 				cycles -= 2;
 				break;
+			/*illegal opcode, same as 0xE9*/
+			case 0xEB :
+				temp = get_carry_flag();
+				check_for_carry(a_register,*p - (1 - get_carry_flag()));
+				a_register -= ( (*p) - (1 - temp));
+				cycles -= 2;
+				break;
 			case 0xE5 :
 				temp = get_carry_flag();
 				check_for_carry(a_register,read_memory(zero_page(*p)) - (1-get_carry_flag()));
@@ -1241,7 +1248,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 	#arithmetic instuctions
 	ADC = ((((0x69 | 0x65 | 0x75 | 0x61 | 0x71) . extend) @{arg_count = 1;}) | ((0x6D | 0x7D | 0x79) . extend . extend) @{arg_count = 2;}) @add;
-	SBC = ((((0xE9 | 0xE5 | 0xF5 | 0xE1 | 0xF1) . extend) @{arg_count = 1;}) | ((0xED | 0xFD | 0xF9) . extend . extend) @{arg_count = 2;}) @subtract;
+	SBC = ((((0xE9 | 0xE5 | 0xF5 | 0xE1 | 0xF1 | 0xEB) . extend) @{arg_count = 1;}) | ((0xED | 0xFD | 0xF9) . extend . extend) @{arg_count = 2;}) @subtract;
 	CMP = ((((0xC9 | 0xC5 | 0xD5 | 0xC1 | 0xD1) . extend) @{arg_count = 1;}) | ((0xCD | 0xDD | 0xD9) . extend . extend) @{arg_count = 2;}) @compare;
 	CPX = (((0xE0 | 0xE4) . extend @{arg_count = 1;}) | ((0xEC) . extend . extend @{arg_count = 2;})) @compare_x;
 	CPY = (((0xC0 | 0xC4) . extend @{arg_count = 1;}) | ((0xCC) . extend . extend @{arg_count = 2;})) @compare_y;
