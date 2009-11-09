@@ -3,6 +3,7 @@ require 'register_transfer/register_transfer'
 require 'stack_ops/stack_ops'
 require 'logical/logical'
 require 'arithmetic/arithmetic'
+require 'incs_decs/incs_decs'
 
 $a_line = 0
 $x_line = 1

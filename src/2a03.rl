@@ -50,7 +50,7 @@ void push(unsigned char value){
 }
 unsigned char pop(){
 	pstack += 1;
-  return m[pstack + STACK_OFFSET];;
+  return m[pstack + STACK_OFFSET];
 }
 
 /*addressing modes*/
@@ -1182,6 +1182,54 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		}
 		check_for_negative(y_register);
 	}
+
+	##increments and decrements
+	action inc {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+		switch(current_op){
+			case 0xE6 :
+				temp = read_memory(zero_page(*p));
+				temp++;				
+				write_memory(zero_page(*p),temp);
+				cycles -= 5;
+				break;
+			case 0xF6 :
+				temp = read_memory(zero_page_x(*p));
+				temp++;				
+				write_memory(zero_page_x(*p),temp);
+				cycles -= 6;
+				break;
+			case 0xEE :
+				temp = read_memory(absolute(*p,*(p-1)));
+				temp++;				
+				write_memory(absolute(*p,*(p-1)),temp);
+				cycles -= 6;
+				break;
+			case 0xFE :
+				temp = read_memory(absolute_x(*p,*(p-1)));
+				temp++;				
+				write_memory(absolute_x(*p,*(p-1)),temp);
+				cycles -= 7;
+				break;
+			default : break;
+		}
+		check_for_negative(temp);
+		check_for_zero(temp);
+	}
+	action inc_x {			
+		x_register++;
+		cycles -= 2;
+		check_for_negative(x_register);
+		check_for_zero(x_register);
+	}
+	action inc_y {			
+		y_register++;
+		cycles -= 2;
+		check_for_negative(y_register);
+		check_for_zero(y_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1253,6 +1301,10 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	CPX = (((0xE0 | 0xE4) . extend @{arg_count = 1;}) | ((0xEC) . extend . extend @{arg_count = 2;})) @compare_x;
 	CPY = (((0xC0 | 0xC4) . extend @{arg_count = 1;}) | ((0xCC) . extend . extend @{arg_count = 2;})) @compare_y;
 
+	#increments and decrements
+	INC = (((0xE6 | 0xF6) . extend @{arg_count = 1;}) | ((0xEE | 0xFE) . extend . extend @{arg_count = 2;})) @inc;
+	INX = (0xE8 @{arg_count = 0;}) @inc_x;
+
   Lexecute = (
     #system functions
     NOP | DOP | TOP | BRK | RTI |
@@ -1265,7 +1317,9 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#logical instructions
 		AND | EOR | ORA | BIT | AAC | AAX | ARR | ASR | ATX | AXA | AXS | LAR | SXA | SYA | XAS |
 		#arithmetic instructions
-		ADC | SBC | CMP | CPX | CPY
+		ADC | SBC | CMP | CPX | CPY |
+		#increments and decrements
+		INC | INX
   );
     
   main := (Lexecute @cyclic_tasks)+;
