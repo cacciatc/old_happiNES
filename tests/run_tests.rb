@@ -5,6 +5,7 @@ require 'logical/logical'
 require 'arithmetic/arithmetic'
 require 'incs_decs/incs_decs'
 require 'jumps_calls/jumps_calls'
+require 'sys_funcs/sys_funcs'
 
 $a_line = 0
 $x_line = 1

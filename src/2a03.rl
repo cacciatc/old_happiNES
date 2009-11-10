@@ -274,13 +274,15 @@ void check_for_carry(unsigned char value1,unsigned char value2){
     set_break_flag();
     cycles -= 7;
   }
-  
   action return_from_interrupt {
     /*pop status and pc*/
     status = pop();
     p = pop();
     cycles -= 6;
   }
+	action kill {
+		fbreak;
+	}
   
   ##load and store instructions
   action load_accumulator {
@@ -1381,7 +1383,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
       cycles += interrupt_period;
     }
     if(p >= pe){
-      exit(0);
+      fbreak;
 		}
 		/*perform any scheduled jumps*/
 		if(is_jump_planned){
@@ -1397,6 +1399,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
   TOP = ((0x0C | 0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC) . extend . extend) @{arg_count = 2;} @triple_no_operation;
   BRK = (0x00) @{arg_count = 0;} @brk;
   RTI = (0x40) @{arg_count = 0;} @return_from_interrupt;
+	KIL = ((0x02 | 0x12 | 0x22 | 0x32 | 0x42 | 0x52 | 0x62 | 0x72 | 0x92 | 0xB2 | 0xD2 | 0xF2) @{arg_count = 0;}) @kill;
   
   #load and store instructions
 	LAX = ( ((0xA7 | 0xB7 | 0xA3 | 0xB3) . extend) @{arg_count = 1;} | ((0xAF | 0xBF) . extend . extend) @{arg_count = 2;}) @load_accumulator_and_x;
@@ -1457,11 +1460,9 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	#jumps and calls
 	JMP = ((0x4C | 0x6C) . extend . extend @{arg_count = 2;}) @jump;
 
-	KIL = (0x02) @{exit(0);};
-
   Lexecute = (
     #system functions
-    NOP | DOP | TOP | BRK | RTI |
+    NOP | DOP | TOP | BRK | RTI | KIL |
     #load and store instructions
     LAX | LDA | LDX | LDY | STA | STX | STY |
 		#register transfer instructions
