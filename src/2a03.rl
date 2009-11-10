@@ -39,7 +39,7 @@ int interrupt_period = 100;
 
 /*used to perform jumps*/
 int is_jump_planned;
-int* jump_address;
+unsigned char* jump_address;
 
 
 /*memory functions*/
@@ -1367,11 +1367,21 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 			default : break;
 		}
 	}
+	action jump_to_subroutine {
+		push(p-m-ROM_START+1);		
+		schedule_jump(absolute(*p,*(p-1)));
+		cycles -= 6;
+	}
+	action return_from_subroutine {
+		unsigned char temp = pop();		
+		schedule_jump(temp);
+		cycles -= 6;
+	}
   
   #special actions
   action cyclic_tasks {
 		/*debug code*/
-    /*int i;
+		/*int i;
 		printf("[0x%.4X] ",p-arg_count);
     for(i = arg_count; i >= 0;i--){
       printf("0x%.4X ",*(p-i));
@@ -1402,13 +1412,13 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	KIL = ((0x02 | 0x12 | 0x22 | 0x32 | 0x42 | 0x52 | 0x62 | 0x72 | 0x92 | 0xB2 | 0xD2 | 0xF2) @{arg_count = 0;}) @kill;
   
   #load and store instructions
-	LAX = ( ((0xA7 | 0xB7 | 0xA3 | 0xB3) . extend) @{arg_count = 1;} | ((0xAF | 0xBF) . extend . extend) @{arg_count = 2;}) @load_accumulator_and_x;
-  LDA = ( (((0xA9 | 0xA5 | 0xB5 | 0xA1 | 0xB1) . extend) @{arg_count = 1;}) | (((0xAD | 0xBD | 0xB9) . extend . extend) @{arg_count = 2;}) ) @load_accumulator;
-  LDX = ( (((0xA2 | 0xA6 | 0xB6) . extend) @{arg_count = 1;}) | (((0xAE | 0xBE) . extend .extend) @{arg_count = 2;}) ) @load_x;
-  LDY = ( (((0xA0 | 0xA4 | 0xB4) . extend) @{arg_count = 1;}) | (((0xAC | 0xBC) . extend .extend) @{arg_count = 2;}) ) @load_y;
-  STA = ( (((0x85 | 0x95 | 0x81 | 0x91) .extend) @{arg_count = 1;}) | (((0x8D | 0x9D | 0x99) . extend . extend) @{arg_count = 2;}) ) @store_accumulator; 
-  STX = ( ((0x86 | 0x96) . extend) @{arg_count = 1;} | ((0x8E) . extend . extend) @{arg_count = 2;}) @store_x;
-	STY = ( ((0x84 | 0x94) . extend) @{arg_count = 1;} | ((0x8C) . extend . extend) @{arg_count = 2;}) @store_y;
+	LAX = (((0xA7 | 0xB7 | 0xA3 | 0xB3) . extend) @{arg_count = 1;} | ((0xAF | 0xBF) . extend . extend) @{arg_count = 2;}) @load_accumulator_and_x;
+  LDA = ((((0xA9 | 0xA5 | 0xB5 | 0xA1 | 0xB1) . extend) @{arg_count = 1;}) | (((0xAD | 0xBD | 0xB9) . extend . extend) @{arg_count = 2;}) ) @load_accumulator;
+  LDX = ((((0xA2 | 0xA6 | 0xB6) . extend) @{arg_count = 1;}) | (((0xAE | 0xBE) . extend .extend) @{arg_count = 2;}) ) @load_x;
+  LDY = ((((0xA0 | 0xA4 | 0xB4) . extend) @{arg_count = 1;}) | (((0xAC | 0xBC) . extend .extend) @{arg_count = 2;}) ) @load_y;
+  STA = ((((0x85 | 0x95 | 0x81 | 0x91) .extend) @{arg_count = 1;}) | (((0x8D | 0x9D | 0x99) . extend . extend) @{arg_count = 2;}) ) @store_accumulator; 
+  STX = (((0x86 | 0x96) . extend) @{arg_count = 1;} | ((0x8E) . extend . extend) @{arg_count = 2;}) @store_x;
+	STY = (((0x84 | 0x94) . extend) @{arg_count = 1;} | ((0x8C) . extend . extend) @{arg_count = 2;}) @store_y;
 
 	#register transfer instructions
 	TAX = (0xAA @{arg_count = 0;}) @transfer_accumulator_to_x;
@@ -1459,6 +1469,8 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 	#jumps and calls
 	JMP = ((0x4C | 0x6C) . extend . extend @{arg_count = 2;}) @jump;
+	JSR = ((0x20 . extend . extend) @{arg_count = 2;}) @jump_to_subroutine;
+	RTS = (0x60 @{arg_count = 0;}) @return_from_subroutine;
 
   Lexecute = (
     #system functions
@@ -1476,7 +1488,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#increments and decrements
 		INC | INX | INY | DEC | DEX | DEY | DCP |
 		#jumps and calls
-		JMP
+		JMP | JSR | RTS
   );
     
   main := (Lexecute @cyclic_tasks)+;
