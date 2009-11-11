@@ -25,6 +25,7 @@
 		-Uses Ragel on 2a03.rl to create 2a03.c
 		-Compiles 2a03.c and creates an executable for testing called 2a03.
 		-Runs the test suites in the tests dir.
+	Note that one does not have to build the ragel file, but can just compile using the 2a03.c file.
 
 -License-
 	Please check the license file for more information.
