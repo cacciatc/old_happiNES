@@ -37,11 +37,11 @@ class JSRTest < Test::Unit::TestCase
  		instr[101] = 0x60 
 		instr[112] = 0x60
 		write_input_file(instr)
-	#	system(".././2a03 #{@input_file} #{@temp_file}")
-	#	f = File.new(@temp_file)
-	#	fstring = f.readlines
-	#	f.close
-	#	assert_equal("04",fstring[$x_line].chomp)
+		system(".././2a03 #{@input_file} #{@temp_file}")
+		f = File.new(@temp_file)
+		fstring = f.readlines
+		f.close
+		assert_equal("04",fstring[$x_line].chomp)
 	end
 	
 	def teardown

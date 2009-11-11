@@ -1,48 +1,47 @@
-#same test suite as JSR
 require 'test/unit'
 
-class RTSTest < Test::Unit::TestCase
+class BCCTest < Test::Unit::TestCase
 	def setup
-		@temp_file = "rts_dump"
-		@input_file = "rts_input"
+		@temp_file = "bcc_dump"
+		@input_file = "bcc_input"
 	end
 
-	def test_addr_mode_implied
+	def test_addr_mode_relative
 		instr = []
-		(0..99).each do
+		(0..20).each do
 			instr.push(0xE8)
 		end
-		instr[2] = 0x20
-		instr[3] = 0x60 
-		instr[4] = 0x00
+		instr[2] = 0x18
+		instr[3] = 0x90
+		instr[4] = 0x02
 		instr[5] = 0x02
-		instr[98] = 0x60;
+		instr[6] = 0xA9
+		instr[7] = 0x09
+		instr[8] = 0x02
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("04",fstring[$x_line].chomp)
+		assert_equal("09",fstring[$a_line].chomp)
 	
 		instr = []	
-		(0..255).each do
+		(0..20).each do
 			instr.push(0xE8)
 		end
-		instr[2] = 0x20
-		instr[3] = 0x60
-		instr[4] = 0x00
+		instr[2] = 0x38
+		instr[3] = 0x90
+		instr[4] = 0x02
 		instr[5] = 0x02
-		instr[98] = 0x20
-		instr[99] = 0x70
-		instr[100] = 0x00
- 		instr[101] = 0x60 
-		instr[112] = 0x60
+		instr[6] = 0xA9
+		instr[7] = 0x09
+		instr[8] = 0x02
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("04",fstring[$x_line].chomp)
+		assert_equal("00",fstring[$a_line].chomp)
 	end
 	
 	def teardown

@@ -71,10 +71,6 @@ short zero_page_y(unsigned char zero_page_address){
   return ((zero_page_address + y_register));
 }
 
-short relative(char offset){
-  return (p+offset);
-}
-
 short absolute(unsigned char most_sig_byte, unsigned char least_sig_byte){
   return ((most_sig_byte*(256)) + least_sig_byte);
 }
@@ -112,6 +108,10 @@ short indirect_indexed(unsigned char zero_page_address){
 void schedule_jump(short address){
 	is_jump_planned = 1;
 	jump_address = (m + address + ROM_START);
+}
+void schedule_relative_jump(unsigned char bytes){
+	is_jump_planned = 1;
+	jump_address = p + bytes;
 }
 
 /*status functions*/
@@ -1372,10 +1372,29 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		schedule_jump(absolute(*p,*(p-1)));
 		cycles -= 6;
 	}
-	action return_from_subroutine {
-		unsigned char temp = pop();		
-		schedule_jump(temp);
+	action return_from_subroutine {		
+		schedule_jump(pop());
 		cycles -= 6;
+	}
+
+	##branches
+	action branch_if_carry_clear {
+		if(!get_carry_flag()){
+			schedule_relative_jump(*p);
+			cycles -= 1;
+		}
+		/*currently not accounting for if new address is on a different page*/
+		cycles -= 2;
+	}
+
+	##status flag changes
+	action set_carry_flag {
+		set_carry_flag();
+		cycles -= 2;
+	}
+	action clear_carry_flag {
+		clear_carry_flag();
+		cycles -= 2;
 	}
   
   #special actions
@@ -1472,6 +1491,13 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	JSR = ((0x20 . extend . extend) @{arg_count = 2;}) @jump_to_subroutine;
 	RTS = (0x60 @{arg_count = 0;}) @return_from_subroutine;
 
+	##branches
+	BCC = ((0x90 . extend) @{arg_count = 1;}) @branch_if_carry_clear;
+
+	##status flag changes
+	CLC = (0x18 @{arg_count = 0;}) @clear_carry_flag;
+	SEC = (0x38 @{arg_count = 0;}) @set_carry_flag;
+
   Lexecute = (
     #system functions
     NOP | DOP | TOP | BRK | RTI | KIL |
@@ -1488,7 +1514,11 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#increments and decrements
 		INC | INX | INY | DEC | DEX | DEY | DCP |
 		#jumps and calls
-		JMP | JSR | RTS
+		JMP | JSR | RTS |
+		#branches
+		BCC |
+		#status flag changes
+		CLC | SEC
   );
     
   main := (Lexecute @cyclic_tasks)+;
