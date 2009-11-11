@@ -146,7 +146,7 @@ int get_break_flag(){
 void set_decimal_mode_flag(){
   status |= (1 << 3);
 }
-void clear_decimal_flag(){
+void clear_decimal_mode_flag(){
 	status &= ~(1 << 3);
 }
 int get_decimal_mode_flag(){
@@ -1472,6 +1472,14 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		clear_interrupt_disable_flag();
 		cycles -= 2;
 	}
+	action set_decimal_mode_flag {
+		set_decimal_mode_flag();
+		cycles -= 2;
+	}
+	action clear_decimal_mode_flag {
+		clear_decimal_mode_flag();
+		cycles -= 2;
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1583,6 +1591,8 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	CLV = (0xB8 @{arg_count = 0;}) @clear_overflow_flag;
 	SEI = (0x78 @{arg_count = 0;}) @set_interrupt_disable_flag;
 	CLI = (0x58 @{arg_count = 0;}) @clear_interrupt_disable_flag;
+	CLD = (0xD8 @{arg_count = 0;}) @clear_decimal_mode_flag;
+	SED = (0xF8 @{arg_count = 0;}) @set_decimal_mode_flag;
 
   Lexecute = (
     #system functions
@@ -1604,7 +1614,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#branches
 		BCC | BCS | BEQ | BNE | BMI | BPL | BVC | BVS |
 		#status flag changes
-		CLC | SEC | CLV | CLI | SEI
+		CLC | SEC | CLV | CLI | SEI | CLD | SED
   );
     
   main := (Lexecute @cyclic_tasks)+;
