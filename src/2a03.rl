@@ -1464,6 +1464,14 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		clear_overflow_flag();
 		cycles -= 2;
 	}
+	action set_interrupt_disable_flag {
+		set_interrupt_disable_flag();
+		cycles -= 2;
+	}
+	action clear_interrupt_disable_flag {
+		clear_interrupt_disable_flag();
+		cycles -= 2;
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1573,6 +1581,8 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	CLC = (0x18 @{arg_count = 0;}) @clear_carry_flag;
 	SEC = (0x38 @{arg_count = 0;}) @set_carry_flag;
 	CLV = (0xB8 @{arg_count = 0;}) @clear_overflow_flag;
+	SEI = (0x78 @{arg_count = 0;}) @set_interrupt_disable_flag;
+	CLI = (0x58 @{arg_count = 0;}) @clear_interrupt_disable_flag;
 
   Lexecute = (
     #system functions
@@ -1594,7 +1604,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#branches
 		BCC | BCS | BEQ | BNE | BMI | BPL | BVC | BVS |
 		#status flag changes
-		CLC | SEC | CLV
+		CLC | SEC | CLV | CLI | SEI
   );
     
   main := (Lexecute @cyclic_tasks)+;
