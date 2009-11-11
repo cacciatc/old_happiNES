@@ -1394,6 +1394,14 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		/*currently not accounting for if new address is on a different page*/
 		cycles -= 2;
 	}
+	action branch_if_equal {
+		if(get_zero_flag()){
+			schedule_relative_jump(*p);
+			cycles -= 1;
+		}
+		/*currently not accounting for if new address is on a different page*/
+		cycles -= 2;
+	}
 
 	##status flag changes
 	action set_carry_flag {
@@ -1502,6 +1510,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	##branches
 	BCC = ((0x90 . extend) @{arg_count = 1;}) @branch_if_carry_clear;
 	BCS = ((0xB0 . extend) @{arg_count = 1;}) @branch_if_carry_set;
+	BEQ = ((0xF0 . extend) @{arg_count = 1;}) @branch_if_equal;
 
 	##status flag changes
 	CLC = (0x18 @{arg_count = 0;}) @clear_carry_flag;
@@ -1525,7 +1534,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#jumps and calls
 		JMP | JSR | RTS |
 		#branches
-		BCC | BCS |
+		BCC | BCS | BEQ |
 		#status flag changes
 		CLC | SEC
   );
