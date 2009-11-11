@@ -33,7 +33,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("80",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 
 	def test_addr_mode_zero_page
@@ -62,7 +62,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_zero_page_x
@@ -91,7 +91,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_absolute
@@ -120,7 +120,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_absolute_x
@@ -149,7 +149,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_absolute_y
@@ -178,7 +178,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_indirect_x
@@ -207,7 +207,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def test_addr_mode_indirect_y
@@ -236,7 +236,7 @@ class ADCTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("81",fstring[$a_line].chomp)
-		assert_equal("81",fstring[$status_line].chomp)
+		assert_equal("C1",fstring[$status_line].chomp)
 	end
 	
 	def teardown
