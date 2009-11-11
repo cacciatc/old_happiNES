@@ -1436,6 +1436,10 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		clear_carry_flag();
 		cycles -= 2;
 	}
+	action clear_overflow_flag {
+		clear_overflow_flag();
+		cycles -= 2;
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1542,6 +1546,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	##status flag changes
 	CLC = (0x18 @{arg_count = 0;}) @clear_carry_flag;
 	SEC = (0x38 @{arg_count = 0;}) @set_carry_flag;
+	CLV = (0xB8 @{arg_count = 0;}) @clear_overflow_flag;
 
   Lexecute = (
     #system functions
@@ -1563,7 +1568,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#branches
 		BCC | BCS | BEQ | BNE | BMI | BPL |
 		#status flag changes
-		CLC | SEC
+		CLC | SEC | CLV
   );
     
   main := (Lexecute @cyclic_tasks)+;
