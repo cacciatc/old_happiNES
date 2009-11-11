@@ -9,4 +9,5 @@ logical - tests for logical instructions
 stack_ops - tests for stack instructions
 nes - tests nes specific functions of the 2a03
 register_transfer - tests for register transfer instructions
+status_flags - tests for status flag changing instructions
 sys_funcs - tests for system functions

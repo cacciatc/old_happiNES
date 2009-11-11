@@ -1,4 +1,6 @@
-
+/*TODO
+** -not counting cycles correctly for looking up across pages.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +10,10 @@
 #define STACK_OFFSET 4096 //7FFFF?
 #define ROM_START 0x8000
 
-#define IRQ 65534
+/*interrupt addresses*/
+#define NMI 0xFFFA
+#define RES 0xFFFC
+#define IRQ 0xFFFE
 
 /*memory*/
 unsigned char m[RAM_SIZE];
@@ -28,12 +33,12 @@ unsigned char *p;
 /*pointer to the end of input*/
 unsigned char *pe;
   
-/*argugment count for opcodes*/
+/*argument count for opcodes*/
 int arg_count = 0;
 /*current number of cycles*/
 int cycles    = 0;
 /*current opcode*/
-unsigned char current_op= 0;
+unsigned char current_op = 0;
 /*used for timing*/
 int interrupt_period = 100;
 
@@ -218,7 +223,6 @@ void check_for_carry(unsigned char value1,unsigned char value2){
   action no_operation {
     cycles -= 2;
   }
-  
   action double_no_operation {
     current_op = *(p-arg_count);
     switch(current_op){
@@ -250,7 +254,6 @@ void check_for_carry(unsigned char value1,unsigned char value2){
         cycles -= 4;
     }
   }
-  
   action triple_no_operation {
     current_op = *(p-arg_count);
     unsigned char most_sig  = *(p-arg_count+2);
@@ -263,21 +266,21 @@ void check_for_carry(unsigned char value1,unsigned char value2){
         cycles -= (4 + (absolute_x(most_sig,least_sig) > PAGE_SIZE ? 1 : 0));
     }
   }
-  
   action brk {
     /*push program counter and status*/
-    push(p);
+    push(p-m-ROM_START+1);
     push(status);
     /*load interrupt vector*/
-    //p = read_memory(IRQ);
-    //status = read_memory(IRQ+1);
+    schedule_jump(read_memory(IRQ+1)*256 + read_memory(IRQ));
     set_break_flag();
-    cycles -= 7;
+ 		set_interrupt_disable_flag();   
+		cycles -= 7;
   }
   action return_from_interrupt {
     /*pop status and pc*/
     status = pop();
-    p = pop();
+    schedule_jump(pop());
+ 		clear_interrupt_disable_flag();
     cycles -= 6;
   }
 	action kill {
@@ -1489,7 +1492,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
     for(i = arg_count; i >= 0;i--){
       printf("0x%.4X ",*(p-i));
     }
-    printf("\n");*/
+    printf("\n");*.
     /*end*/
 		
     if(cycles <= 0){
