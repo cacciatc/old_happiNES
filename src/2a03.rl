@@ -1567,6 +1567,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	BMI = ((0x30 . extend) @{arg_count = 1;}) @branch_if_minus;
 	BPL = ((0x10 . extend) @{arg_count = 1;}) @branch_if_positive;
 	BVC = ((0x50 . extend) @{arg_count = 1;}) @branch_if_overflow_clear;
+	BVS = ((0x70 . extend) @{arg_count = 1;}) @branch_if_overflow_set;
 
 	##status flag changes
 	CLC = (0x18 @{arg_count = 0;}) @clear_carry_flag;
@@ -1591,7 +1592,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#jumps and calls
 		JMP | JSR | RTS |
 		#branches
-		BCC | BCS | BEQ | BNE | BMI | BPL | BVC |
+		BCC | BCS | BEQ | BNE | BMI | BPL | BVC | BVS |
 		#status flag changes
 		CLC | SEC | CLV
   );
