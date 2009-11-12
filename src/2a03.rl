@@ -1560,7 +1560,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 		switch(current_op){
 			case 0x4A :
-				/*set carry flag to old bit 7*/
+				/*set carry flag to old bit 0*/
 				if(a_register & (1 << 0)){
 					set_carry_flag();
 				}
@@ -1572,7 +1572,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				break;
 			case 0x46 :
 				temp = read_memory(zero_page(*p));				
-				/*set carry flag to old bit 7*/
+				/*set carry flag to old bit 0*/
 				if(temp & (1 << 0)){
 					set_carry_flag();
 				}
@@ -1584,7 +1584,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				break;
 			case 0x56 :
 				temp = read_memory(zero_page_x(*p));				
-				/*set carry flag to old bit 7*/
+				/*set carry flag to old bit 0*/
 				if(temp & (1 << 0)){
 					set_carry_flag();
 				}
@@ -1596,7 +1596,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				break;
 			case 0x4E :
 				temp = read_memory(absolute(*p,*(p-1)));				
-				/*set carry flag to old bit 7*/
+				/*set carry flag to old bit 0*/
 				if(temp & (1 << 0)){
 					set_carry_flag();
 				}
@@ -1608,7 +1608,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 				break;
 			case 0x5E :
 				temp = read_memory(absolute_x(*p,*(p-1)));				
-				/*set carry flag to old bit 7*/
+				/*set carry flag to old bit 0*/
 				if(temp & (1 << 0)){
 					set_carry_flag();
 				}
@@ -1616,6 +1616,83 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 					clear_carry_flag();
 				}
 				a_register = temp/2;
+				cycles -= 7;
+				break;
+			default : break;
+		}
+		check_for_zero(a_register);
+		check_for_negative(a_register);
+	}
+	action rotate_left {
+		unsigned char temp;
+		unsigned char old_carry;
+		
+		current_op = *(p-arg_count);
+		old_carry = get_carry_flag();
+
+		switch(current_op){
+			case 0x2A :
+				/*set carry flag to old bit 7*/
+				if(a_register & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register *= 2;
+				a_register |= (old_carry<<0);
+				cycles -= 2;
+				break;
+			case 0x26 :
+				temp = read_memory(zero_page(*p));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp*2;
+				a_register |= (old_carry<<0);
+				cycles -= 5;
+				break;
+			case 0x36 :
+				temp = read_memory(zero_page_x(*p));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp*2;
+				a_register |= (old_carry<<0);
+				cycles -= 6;
+				break;
+			case 0x2E :
+				temp = read_memory(absolute(*p,*(p-1)));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp*2;
+				a_register |= (old_carry<<0);
+				cycles -= 6;
+				break;
+			case 0x3E :
+				temp = read_memory(absolute_x(*p,*(p-1)));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp*2;
+				a_register |= (old_carry<<0);
 				cycles -= 7;
 				break;
 			default : break;
@@ -1740,6 +1817,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	##shifts
 	ASL = ((0x0A @{arg_count = 0;}) | ((0x06 | 0x16) . extend @{arg_count = 1;}) | ((0x0E | 0x1E) . extend . extend @{arg_count = 2;})) @arithmetic_shift_left;
 	LSR = ((0x4A @{arg_count = 0;}) | ((0x46 | 0x56) . extend @{arg_count = 1;}) | ((0x4E | 0x5E) . extend . extend @{arg_count = 2;})) @logical_shift_right;
+	ROL = ((0x2A @{arg_count = 0;}) | ((0x26 | 0x36) . extend @{arg_count = 1;}) | ((0x2E | 0x3E) . extend . extend @{arg_count = 2;})) @rotate_left;
 
   Lexecute = (
     #system functions
@@ -1763,7 +1841,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#status flag changes
 		CLC | SEC | CLV | CLI | SEI | CLD | SED |
 		#shifts
-		ASL | LSR
+		ASL | LSR | ROL
   );
     
   main := (Lexecute @cyclic_tasks)+;
