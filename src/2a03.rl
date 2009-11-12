@@ -3,6 +3,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define PAGE_SIZE     256
 #define MY_STACK_SIZE 256
@@ -1935,30 +1936,20 @@ int load_rom(char* fname){
     printf("Unable to open ROM!\n");
     exit(1);
   }
-  fseek(fp,0,SEEK_END);
+
+	/*read and process INES*/
+	/*read remaining parts of file*/
+
+	fseek(fp,0,SEEK_END);
   fsize = ftell(fp);
-  p = (unsigned char*)malloc(sizeof(unsigned char) * fsize);
-  fread(p,sizeof(unsigned char),fsize,fp);
+	fseek(fp,0,SEEK_SET);
+  fread(&m[ROM_START],sizeof(unsigned char),fsize,fp);
+	p = &m[ROM_START];
+	pe = p + fsize;
   fclose(fp);
-  return(fsize);
+	return fsize;
 }
 
-/*debug code*/
-void dump_mem(){
-  int i,j;
-	printf("%.2X\n",a_register);
-	printf("%.2X\n",x_register);
-	printf("%.2X\n",y_register);
-	printf("%.2X\n",status);
-
-  for(i = 0;i<PAGE_SIZE*2;i+=16){
-	printf("[%.4x-%.4x]",i,i+15);
-	for(j = 0; j < 15; j++){
-		printf(" %.2x",m[j+(i*15)]);
-	}
-	puts("");
-  }
-}
 
 /*packs up memory and registers, etc*/
 void pack_it(char* fname){
@@ -2018,9 +2009,14 @@ int main(int argc,char** argv){
 		pstack = MY_STACK_SIZE-1;
 	
 		%%write init;
-
-		load_it(argv[1]);
-
+		/*ines file*/
+		if(strstr(argv[1],".nes")){
+			load_rom(argv[1]);
+		}
+		else{
+			/*6502 generic code*/
+			load_it(argv[1]);
+		}
 		%%write exec;
 
 		pack_it(argv[2]);

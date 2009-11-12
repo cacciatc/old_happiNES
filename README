@@ -5,12 +5,11 @@
 		-If this project goes well, I am interested in providing better network support, since that seems to be lacking in most of the NES emulators I have used.
 
 -Version-
-	0.0
+	0.1
 
 -Roadmap-
 	Following is a general guideline leading up to version 1.0:
-		-0.1  Support all 6502 instructions including undocumented opcodes.
-		-0.2  Complete 2a03 core (including sound).
+		-0.2  Complete 2a03 core (including sound) and finish undocumented opcodes.
 		-0.3  Complete PPU (Picture Processing Unit).
 		-0.4  Support iNES ROMS and certain MMUs.
 		-0.5  GUI.
