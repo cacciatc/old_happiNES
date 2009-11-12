@@ -1700,6 +1700,83 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		check_for_zero(a_register);
 		check_for_negative(a_register);
 	}
+	action rotate_right {
+		unsigned char temp;
+		unsigned char old_carry;
+
+		current_op = *(p-arg_count);
+		old_carry = get_carry_flag();
+
+		switch(current_op){
+			case 0x6A :
+				/*set carry flag to old bit 0*/
+				if(a_register & (1 << 0)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register /= 2;
+				a_register |= (old_carry<<7);
+				cycles -= 2;
+				break;
+			case 0x66 :
+				temp = read_memory(zero_page(*p));				
+				/*set carry flag to old bit 0*/
+				if(temp & (1 << 0)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp/2;
+				a_register |= (old_carry<<7);
+				cycles -= 5;
+				break;
+			case 0x76 :
+				temp = read_memory(zero_page_x(*p));				
+				/*set carry flag to old bit 0*/
+				if(temp & (1 << 0)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp/2;
+				a_register |= (old_carry<<7);
+				cycles -= 6;
+				break;
+			case 0x6E :
+				temp = read_memory(absolute(*p,*(p-1)));				
+				/*set carry flag to old bit 0*/
+				if(temp & (1 << 0)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp/2;
+				a_register |= (old_carry<<7);
+				cycles -= 6;
+				break;
+			case 0x7E :
+				temp = read_memory(absolute_x(*p,*(p-1)));				
+				/*set carry flag to old bit 0*/
+				if(temp & (1 << 0)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = temp/2;
+				a_register |= (old_carry<<7);
+				cycles -= 7;
+				break;
+			default : break;
+		}
+		check_for_zero(a_register);
+		check_for_negative(a_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1818,6 +1895,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	ASL = ((0x0A @{arg_count = 0;}) | ((0x06 | 0x16) . extend @{arg_count = 1;}) | ((0x0E | 0x1E) . extend . extend @{arg_count = 2;})) @arithmetic_shift_left;
 	LSR = ((0x4A @{arg_count = 0;}) | ((0x46 | 0x56) . extend @{arg_count = 1;}) | ((0x4E | 0x5E) . extend . extend @{arg_count = 2;})) @logical_shift_right;
 	ROL = ((0x2A @{arg_count = 0;}) | ((0x26 | 0x36) . extend @{arg_count = 1;}) | ((0x2E | 0x3E) . extend . extend @{arg_count = 2;})) @rotate_left;
+	ROR = ((0x6A @{arg_count = 0;}) | ((0x66 | 0x76) . extend @{arg_count = 1;}) | ((0x6E | 0x7E) . extend . extend @{arg_count = 2;})) @rotate_right;
 
   Lexecute = (
     #system functions
@@ -1841,7 +1919,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#status flag changes
 		CLC | SEC | CLV | CLI | SEI | CLD | SED |
 		#shifts
-		ASL | LSR | ROL
+		ASL | LSR | ROL | ROR
   );
     
   main := (Lexecute @cyclic_tasks)+;
