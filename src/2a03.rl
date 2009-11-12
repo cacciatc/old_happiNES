@@ -1483,6 +1483,77 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		clear_decimal_mode_flag();
 		cycles -= 2;
 	}
+
+	##shifts
+	action arithmetic_shift_left {
+		unsigned char temp;
+		current_op = *(p-arg_count);
+
+		switch(current_op){
+			case 0x0A :
+				/*set carry flag to old bit 7*/
+				if(a_register & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register *= 2;
+				cycles -= 2;
+				break;
+			case 0x06 :
+				temp = read_memory(zero_page(*p));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = 2*temp;
+				cycles -= 5;
+				break;
+			case 0x16 :
+				temp = read_memory(zero_page_x(*p));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = 2*temp;
+				cycles -= 6;
+				break;
+			case 0x0E :
+				temp = read_memory(absolute(*p,*(p-1)));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = 2*temp;
+				cycles -= 6;
+				break;
+			case 0x1E :
+				temp = read_memory(absolute_x(*p,*(p-1)));				
+				/*set carry flag to old bit 7*/
+				if(temp & (1 << 7)){
+					set_carry_flag();
+				}
+				else{
+					clear_carry_flag();
+				}
+				a_register = 2*temp;
+				cycles -= 7;
+				break;
+			default : break;
+		}
+		check_for_zero(a_register);
+		check_for_negative(a_register);
+	}
   
   #special actions
   action cyclic_tasks {
@@ -1597,6 +1668,9 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 	CLD = (0xD8 @{arg_count = 0;}) @clear_decimal_mode_flag;
 	SED = (0xF8 @{arg_count = 0;}) @set_decimal_mode_flag;
 
+	##shifts
+	ASL = ((0x0A @{arg_count = 0;}) | ((0x06 | 0x16) . extend @{arg_count = 1;}) | ((0x0E | 0x1E) . extend . extend @{arg_count = 2;})) @arithmetic_shift_left;
+
   Lexecute = (
     #system functions
     NOP | DOP | TOP | BRK | RTI | KIL |
@@ -1617,7 +1691,9 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 		#branches
 		BCC | BCS | BEQ | BNE | BMI | BPL | BVC | BVS |
 		#status flag changes
-		CLC | SEC | CLV | CLI | SEI | CLD | SED
+		CLC | SEC | CLV | CLI | SEI | CLD | SED |
+		#shifts
+		ASL
   );
     
   main := (Lexecute @cyclic_tasks)+;
