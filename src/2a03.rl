@@ -1,220 +1,8 @@
 /*TODO
 ** -not counting cycles correctly for looking up across pages.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define PAGE_SIZE     256
-#define MY_STACK_SIZE 256
-#define RAM_SIZE 65535
-#define STACK_OFFSET 4096 //7FFFF?
-#define ROM_START 0x8000
-
-/*interrupt addresses*/
-#define NMI 0xFFFA
-#define RES 0xFFFC
-#define IRQ 0xFFFE
-
-/*memory*/
-unsigned char m[RAM_SIZE];
-/*registers*/
-unsigned char y_register;
-unsigned char x_register;
-unsigned char a_register;
-/*stack pointer*/
-unsigned char pstack;
-/*status flags*/
-unsigned char status;
-
-/*ragel specific vars*/
-int cs;
-/*pointer to current input*/
-unsigned char *p;
-/*pointer to the end of input*/
-unsigned char *pe;
-  
-/*argument count for opcodes*/
-int arg_count = 0;
-/*current number of cycles*/
-int cycles    = 0;
-/*current opcode*/
-unsigned char current_op = 0;
-/*used for timing*/
-int interrupt_period = 100;
-
-/*used to perform jumps*/
-int is_jump_planned;
-unsigned char* jump_address;
-
-
-/*memory functions*/
-int read_memory(short address){
-  return m[address];
-}
-void write_memory(short address,unsigned char value){
-    m[address] = value;
-}
-/*stack functions*/
-void push(unsigned char value){
-  m[pstack + STACK_OFFSET] = value;
-  pstack -= 1;
-}
-unsigned char pop(){
-	pstack += 1;
-  return m[pstack + STACK_OFFSET];
-}
-
-/*addressing modes*/
-/*each function returns an adress*/
-short zero_page(unsigned char zero_page_address){
-  return (zero_page_address);
-}
-short zero_page_x(unsigned char zero_page_address){
-  return ((zero_page_address + x_register));
-}
-short zero_page_y(unsigned char zero_page_address){
-  return ((zero_page_address + y_register));
-}
-
-short absolute(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(256)) + least_sig_byte);
-}
-short absolute_x(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(256)) + least_sig_byte + x_register);
-}
-short absolute_y(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  return ((most_sig_byte*(256)) + least_sig_byte + y_register);
-}
-
-short indirect(unsigned char most_sig_byte, unsigned char least_sig_byte){
-  unsigned char address_least;
-  unsigned char address_most;
-	/*reproduce page boundary bug for original 6502 chips*/	
-	if(least_sig_byte == 0xFF){
- 		address_least = read_memory(0x00FF);
- 	 	address_most = read_memory(0x00);
-	}
-	else{
- 		address_least = read_memory((most_sig_byte*(256)) + least_sig_byte);
- 	 	address_most = read_memory((most_sig_byte*(256)) + least_sig_byte + 1);
-	}
-  return ((address_most*(256)) + address_least);
-}
-
-short indexed_indirect(unsigned char zero_page_address){
-  unsigned char least_sig_byte = read_memory(zero_page_address + x_register);
-  return (least_sig_byte);
-}
-
-short indirect_indexed(unsigned char zero_page_address){
-  unsigned char least_sig_byte = read_memory(zero_page_address);
-  return ((y_register*(256)) + least_sig_byte);
-}
-void schedule_jump(short address){
-	is_jump_planned = 1;
-	jump_address = (m + address + ROM_START);
-}
-void schedule_relative_jump(unsigned char bytes){
-	is_jump_planned = 1;
-	jump_address = p + bytes;
-}
-
-/*status functions*/
-/*first set are accessing flags, and the second are for testing if the flags should be set*/
-void set_negative_flag(){
-  status |= (1 << 7);
-}
-void clear_negative_flag(){
-	status &= ~(1 << 7);
-}
-int get_negative_flag(){
-  return (0x80 & status) == 0x80 ? 1 : 0;
-}
-void set_overflow_flag(){
-  status |= (1 << 6);
-}
-void clear_overflow_flag(){
-	status &= ~(1 << 6);
-}
-int get_overflow_flag(){
-  return ((1 << 6) & status);
-}
-void set_break_flag(){
-  status |= (1 << 4);
-}
-void clear_break_flag(){
-	status &= ~(1 << 4);
-}
-int get_break_flag(){
-  return (0x10 & status) == 0x10 ? 1 : 0;
-}
-void set_decimal_mode_flag(){
-  status |= (1 << 3);
-}
-void clear_decimal_mode_flag(){
-	status &= ~(1 << 3);
-}
-int get_decimal_mode_flag(){
-  return (0x08 & status) == 0x08 ? 1 : 0;
-}
-void set_interrupt_disable_flag(){
-  status |= (1 << 2);
-}
-void clear_interrupt_disable_flag(){
-	status &= ~(1 << 2);
-}
-int get_interrupt_disable_flag(){
-  return (0x04 & status) == 0x04 ? 1 : 0;
-}
-void set_zero_flag(){
-  status |= (1 << 1);
-}
-void clear_zero_flag(){
-	status &= ~(1 << 1);
-}
-int get_zero_flag(){
-  return (0x02 & status) == 0x02 ? 1 : 0;
-}
-void set_carry_flag(){
-  status |= (1 << 0);
-}
-void clear_carry_flag(){
-	status &= ~(1 << 0);
-}
-int get_carry_flag(){
-  return (0x01 & status) == 0x01 ? 1 : 0;
-}
-
-void check_for_zero(unsigned char value){
-  if(!value){
-    set_zero_flag();
-  }
-	else
-		clear_zero_flag();
-}
-void check_for_negative(unsigned char value){
-  if((value & (1 << 7))){
-    set_negative_flag();
-  }
-	else
-		clear_negative_flag();
-}
-void check_for_overflow(unsigned char value1,unsigned char value2){
- 	if( (value1 & (1 << 7))^(value2 & (1 << 7)) ){
-  	set_overflow_flag();
- 	}
-	else
-		clear_overflow_flag();
-}
-void check_for_carry(unsigned char value1,unsigned char value2){
-	if( (value1 & (1 << 7))^(value2 & (1 << 7)) ){
-  	set_carry_flag();
- 	}
-	else
-		clear_carry_flag();
-}
-
+#include "2a03.h"
+		
 %%{
   machine cpu;
   alphtype unsigned char;
@@ -1364,7 +1152,6 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 	##jumps and calls
 	action jump {
-		unsigned int temp;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1787,7 +1574,7 @@ void check_for_carry(unsigned char value1,unsigned char value2){
     for(i = arg_count; i >= 0;i--){
       printf("0x%.4X ",*(p-i));
     }
-    printf("\n");*.
+    printf("\n");*/
     /*end*/
 		
     if(cycles <= 0){
@@ -1929,58 +1716,30 @@ void check_for_carry(unsigned char value1,unsigned char value2){
 
 %%write data;
 
-int load_rom(char* fname){
-  int fsize;
-  FILE* fp = fopen(fname,"rb");
-  if(!fp){
-    printf("Unable to open ROM!\n");
-    exit(1);
-  }
+CPUCore::CPUCore(){
+		cycles = interrupt_period = 100;
+		status    = 0;
+		arg_count = 0;
+		is_jump_planned = 0;
+		pstack = MY_STACK_SIZE-1;
 
-	/*read and process INES*/
-	/*read remaining parts of file*/
-
-	fseek(fp,0,SEEK_END);
-  fsize = ftell(fp);
-	fseek(fp,0,SEEK_SET);
-  fread(&m[ROM_START],sizeof(unsigned char),fsize,fp);
-	p = &m[ROM_START];
-	pe = p + fsize;
-  fclose(fp);
-	return fsize;
+		%%write init;
 }
 
-
-/*packs up memory and registers, etc*/
-void pack_it(char* fname){
-	int i,j;
-	FILE* fp = fopen(fname,"w+");
-	if(!fp){
-		printf("Unable to open dump file.\n");
-		exit(1);
-	}
-	fprintf(fp,"%.2X\n",a_register);
-	fprintf(fp,"%.2X\n",x_register);
-	fprintf(fp,"%.2X\n",y_register);
-	fprintf(fp,"%.2X\n",status);
-	fprintf(fp,"%.2X\n",pstack);
-	fprintf(fp,"%.2X\n",m[pstack+STACK_OFFSET+1]);
-
-	for(i = STACK_OFFSET+MY_STACK_SIZE-1;i >= STACK_OFFSET;i--){
-		fprintf(fp,"%.2X\n",m[i]);
-	}
-
-  for(i = 0;i<PAGE_SIZE;i+=16){
-		fprintf(fp,"[%.4X-%.4X]",i,i+15);
-		for(j = 0; j < 15; j++){
-			fprintf(fp," %.2X",m[j+(i*15)]);
-		}
-		fprintf(fp,"\n");
-  }
-	fclose(fp);
+void CPUCore::run(){
+	%%write exec;
 }
 
-int load_it(char *fname){
+void CPUCore::dump_core(CPUCore_dump* core){
+	core->a_register = a_register;
+	core->x_register = x_register;
+	core->y_register = y_register;
+	core->pstack     = pstack;
+	core->status     = status;
+	memcpy(core->m,m,RAM_SIZE);
+}
+
+void CPUCore::load_debug_code(char* fname){
 	FILE* fp = fopen(fname,"rb");
 	int fsize;
 
@@ -1996,30 +1755,4 @@ int load_it(char *fname){
 	p = &m[ROM_START];
 	pe = p + fsize;
   fclose(fp);
-	return fsize;
-}
-
-int main(int argc,char** argv){
-  if(argc > 2){
-		/*init*/
-		cycles = interrupt_period;
-		status    = 0;
-		arg_count = 0;
-		is_jump_planned = 0;
-		pstack = MY_STACK_SIZE-1;
-	
-		%%write init;
-		/*ines file*/
-		if(strstr(argv[1],".nes")){
-			load_rom(argv[1]);
-		}
-		else{
-			/*6502 generic code*/
-			load_it(argv[1]);
-		}
-		%%write exec;
-
-		pack_it(argv[2]);
-	}
-  return 0;
 }
