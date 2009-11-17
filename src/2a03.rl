@@ -1287,6 +1287,7 @@
 					clear_carry_flag();
 				}
 				a_register *= 2;
+				temp = a_register;
 				cycles -= 2;
 				break;
 			case 0x06 :
@@ -1298,7 +1299,8 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = 2*temp;
+				temp *= 2;
+				write_memory(zero_page(*p),temp);
 				cycles -= 5;
 				break;
 			case 0x16 :
@@ -1310,7 +1312,8 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = 2*temp;
+				temp *= 2;
+				write_memory(zero_page_x(*p),temp);
 				cycles -= 6;
 				break;
 			case 0x0E :
@@ -1322,11 +1325,12 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = 2*temp;
+				temp *= 2;
+				write_memory(absolute(*p,*(p-1)),temp);
 				cycles -= 6;
 				break;
 			case 0x1E :
-				temp = read_memory(absolute_x(*p,*(p-1)));				
+				temp = read_memory(absolute_x(*p,*(p-1)));		
 				/*set carry flag to old bit 7*/
 				if(temp & (1 << 7)){
 					set_carry_flag();
@@ -1334,13 +1338,14 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = 2*temp;
+				temp *= 2;
+				write_memory(absolute_x(*p,*(p-1)),temp);
 				cycles -= 7;
 				break;
 			default : break;
 		}
-		check_for_zero(a_register);
-		check_for_negative(a_register);
+		check_for_zero(temp);
+		check_for_negative(temp);
 	}
 	action logical_shift_right {
 		unsigned char temp;
@@ -1356,6 +1361,7 @@
 					clear_carry_flag();
 				}
 				a_register /= 2;
+				temp = a_register;
 				cycles -= 2;
 				break;
 			case 0x46 :
@@ -1367,7 +1373,8 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
+				temp /= 2;
+				write_memory(zero_page(*p),temp);
 				cycles -= 5;
 				break;
 			case 0x56 :
@@ -1379,7 +1386,8 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
+				temp /= 2;
+				write_memory(zero_page_x(*p),temp);
 				cycles -= 6;
 				break;
 			case 0x4E :
@@ -1391,7 +1399,8 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
+				temp /= 2;
+				write_memory(absolute(*p,*(p-1)),temp);
 				cycles -= 6;
 				break;
 			case 0x5E :
@@ -1403,13 +1412,14 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
+				temp /= 2;
+				write_memory(absolute_x(*p,*(p-1)),temp);
 				cycles -= 7;
 				break;
 			default : break;
 		}
-		check_for_zero(a_register);
-		check_for_negative(a_register);
+		check_for_zero(temp);
+		check_for_negative(temp);
 	}
 	action rotate_left {
 		unsigned char temp;
@@ -1429,6 +1439,7 @@
 				}
 				a_register *= 2;
 				a_register |= (old_carry<<0);
+				temp = a_register;
 				cycles -= 2;
 				break;
 			case 0x26 :
@@ -1440,8 +1451,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp*2;
-				a_register |= (old_carry<<0);
+				temp *= 2;
+				temp |= (old_carry<<0);
+				write_memory(zero_page(*p),temp);
 				cycles -= 5;
 				break;
 			case 0x36 :
@@ -1453,8 +1465,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp*2;
-				a_register |= (old_carry<<0);
+				temp *= 2;
+				temp |= (old_carry<<0);
+				write_memory(zero_page_x(*p),temp);
 				cycles -= 6;
 				break;
 			case 0x2E :
@@ -1466,8 +1479,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp*2;
-				a_register |= (old_carry<<0);
+				temp *= 2;
+				temp |= (old_carry<<0);
+				write_memory(absolute(*p,*(p-1)),temp);
 				cycles -= 6;
 				break;
 			case 0x3E :
@@ -1479,14 +1493,15 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp*2;
-				a_register |= (old_carry<<0);
+				temp *= 2;
+				temp |= (old_carry<<0);
+				write_memory(absolute_x(*p,*(p-1)),temp);
 				cycles -= 7;
 				break;
 			default : break;
 		}
-		check_for_zero(a_register);
-		check_for_negative(a_register);
+		check_for_zero(temp);
+		check_for_negative(temp);
 	}
 	action rotate_right {
 		unsigned char temp;
@@ -1506,6 +1521,7 @@
 				}
 				a_register /= 2;
 				a_register |= (old_carry<<7);
+				temp = a_register;
 				cycles -= 2;
 				break;
 			case 0x66 :
@@ -1517,8 +1533,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
-				a_register |= (old_carry<<7);
+				temp /= 2;
+				temp |= (old_carry<<7);
+				write_memory(zero_page(*p),temp);
 				cycles -= 5;
 				break;
 			case 0x76 :
@@ -1530,8 +1547,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
-				a_register |= (old_carry<<7);
+				temp /= 2;
+				temp |= (old_carry<<7);
+				write_memory(zero_page_x(*p),temp);
 				cycles -= 6;
 				break;
 			case 0x6E :
@@ -1543,8 +1561,9 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
-				a_register |= (old_carry<<7);
+				temp /= 2;
+				temp |= (old_carry<<7);
+				write_memory(absolute(*p,*(p-1)),temp);
 				cycles -= 6;
 				break;
 			case 0x7E :
@@ -1556,14 +1575,15 @@
 				else{
 					clear_carry_flag();
 				}
-				a_register = temp/2;
-				a_register |= (old_carry<<7);
+				temp /= 2;
+				temp |= (old_carry<<7);
+				write_memory(absolute_x(*p,*(p-1)),temp);
 				cycles -= 7;
 				break;
 			default : break;
 		}
-		check_for_zero(a_register);
-		check_for_negative(a_register);
+		check_for_zero(temp);
+		check_for_negative(temp);
 	}
   
   #special actions
