@@ -14,7 +14,7 @@ class BMITest < Test::Unit::TestCase
 		instr[1] = 0xA9
 		instr[2] = 0xD8
 		instr[3] = 0x30
-		instr[4] = 0x02
+		instr[4] = 0x03
 		instr[5] = 0x02
 		instr[6] = 0xA9
 		instr[7] = 0x09
@@ -33,7 +33,7 @@ class BMITest < Test::Unit::TestCase
 		instr[1] = 0xA9
 		instr[2] = 0x34
 		instr[3] = 0x30
-		instr[4] = 0x02
+		instr[4] = 0x03
 		instr[5] = 0x02
 		instr[6] = 0xA9
 		instr[7] = 0x09

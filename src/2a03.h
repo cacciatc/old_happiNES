@@ -59,6 +59,9 @@ class CPUCore {
 		int is_jump_planned;
 		unsigned char* jump_address;
 
+		/*used to determine if debugging*/
+		int is_debug;
+
 		public:
 		/*constructor*/
 		CPUCore();
@@ -146,7 +149,7 @@ class CPUCore {
 		}
 		void schedule_relative_jump(unsigned char bytes){
 			is_jump_planned = 1;
-			jump_address = p + bytes;
+			jump_address = p + ((char)bytes)-1;
 		}
 
 		/*status functions*/

@@ -8,6 +8,7 @@ require 'jumps_calls/jumps_calls'
 require 'sys_funcs/sys_funcs'
 require 'branches/branches'
 require 'status_flag/status_flag'
+require 'algorithms/algorithms'
 require 'shifts/shifts'
 
 $a_line = 0

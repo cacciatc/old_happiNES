@@ -1568,14 +1568,13 @@
   
   #special actions
   action cyclic_tasks {
-		/*debug code*/
-		/*int i;
-		printf("[0x%.4X] ",p-arg_count);
-    for(i = arg_count; i >= 0;i--){
-      printf("0x%.4X ",*(p-i));
-    }
-    printf("\n");*/
-    /*end*/
+		if(is_debug){
+			printf("[0x%.4X] ",(unsigned int)(p-arg_count));
+  		for(int i = arg_count; i >= 0;i--){
+    		printf("0x%.4X ",*(p-i));
+  		}
+  		printf("\n");
+		}
 		
     if(cycles <= 0){
       cycles += interrupt_period;
@@ -1588,6 +1587,10 @@
 			is_jump_planned = 0;
 			p = jump_address;
 			fexec p;
+		}
+		if(is_debug){
+			cs = fcurs;
+			fbreak;
 		}
   }
  
@@ -1711,23 +1714,51 @@
   );
     
   main := (Lexecute @cyclic_tasks)+;
-  
 }%%
 
 %%write data;
 
 CPUCore::CPUCore(){
-		cycles = interrupt_period = 100;
-		status    = 0;
-		arg_count = 0;
-		is_jump_planned = 0;
-		pstack = MY_STACK_SIZE-1;
+	cycles = interrupt_period = 100;
+	status    = 0;
+	arg_count = 0;
+	is_debug  = 0;	
+	pstack    = MY_STACK_SIZE-1;
+	is_jump_planned = 0;
 
-		%%write init;
+	%%write init;
 }
 
 void CPUCore::run(){
 	%%write exec;
+}
+
+void CPUCore::step(){
+	char cmd = 0;	
+	is_debug = 1;
+
+	%%write exec;
+
+	printf("[0x%.4X] ",(unsigned int)(p-arg_count));
+  for(int i = arg_count; i >= 0;i--){
+    printf("0x%.4X ",*(p-i));
+  }
+  printf("\n");
+	while(cmd != 'n'){
+		scanf("%c",&cmd);
+		switch(cmd){
+			case 'd' :
+				printf("a : 0x%X\n",a_register);
+				printf("x : 0x%X\n",x_register);
+				printf("y : 0x%X\n",y_register);
+				printf("s : 0x%X\n",status);
+				break;
+			case 'n':
+				break;				
+			default :
+				break;
+		}
+	}	
 }
 
 void CPUCore::dump_core(CPUCore_dump* core){
@@ -1747,6 +1778,27 @@ void CPUCore::load_debug_code(char* fname){
 		printf("Unable to open input file!\n");
 		exit(1);
 	}
+
+	fseek(fp,0,SEEK_END);
+  fsize = ftell(fp);
+	fseek(fp,0,SEEK_SET);
+  fread(&m[ROM_START],sizeof(unsigned char),fsize,fp);
+	p = &m[ROM_START];
+	pe = p + fsize;
+  fclose(fp);
+}
+
+void CPUCore::load_ines(char* fname){
+	FILE* fp = fopen(fname,"rb");
+	int fsize;
+
+	if(!fp){
+		printf("Unable to open input file!\n");
+		exit(1);
+	}
+	
+	/*first read in header*/
+	/*now prg and char rom*/
 
 	fseek(fp,0,SEEK_END);
   fsize = ftell(fp);

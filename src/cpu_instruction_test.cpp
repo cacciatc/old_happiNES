@@ -33,7 +33,7 @@ void pack_it(char* fname,CPUCore_dump* core){
 }
 
 int main(int argc,char** argv){
-  if(argc > 2){
+	if(argc > 2){
 		/*init*/
 		CPUCore cpu;
 		CPUCore_dump core;
@@ -45,7 +45,7 @@ int main(int argc,char** argv){
 		cpu.dump_core(&core);
 		pack_it(argv[2],&core);
 	}
-  return 0;
+	return 0;
 }
 
 
