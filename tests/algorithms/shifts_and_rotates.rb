@@ -30,6 +30,18 @@ class ShiftsAndRotatesTest < Test::Unit::TestCase
 		assert_equal("01",fstring[$m_line].split(" ")[2])
 	end
 
+	def test_signed_16_bit_divided_by_2
+		instr = [0xA9,0xFE,0x85,0x00,0xA9,0xFF,0x85,0x01,0xA5,0x01,0x0A,0x66,0x01,0x66,0x00]
+		write_input_file(instr)
+		system(".././2a03 #{@input_file} #{@temp_file}")
+		f = File.new(@temp_file)
+		fstring = f.readlines
+		f.close
+		assert_equal("80",fstring[$status_line].chomp)
+		assert_equal("FF",fstring[$m_line].split(" ")[1])
+		assert_equal("FF",fstring[$m_line].split(" ")[2])
+	end
+
 	def teardown
 		system("rm #{@temp_file} #{@input_file}")
 	end

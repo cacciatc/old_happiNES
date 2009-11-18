@@ -1525,7 +1525,7 @@
 				cycles -= 2;
 				break;
 			case 0x66 :
-				temp = read_memory(zero_page(*p));				
+				temp = read_memory(zero_page(*p));		
 				/*set carry flag to old bit 0*/
 				if(temp & (1 << 0)){
 					set_carry_flag();
