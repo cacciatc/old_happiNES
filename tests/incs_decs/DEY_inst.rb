@@ -28,7 +28,7 @@ class DEYTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		assert_equal("7E",fstring[$y_line].chomp)
 		
 		instr = []

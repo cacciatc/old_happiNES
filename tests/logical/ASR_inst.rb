@@ -15,7 +15,7 @@ class ASRTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("7F",fstring[$a_line].chomp)
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x00,0x4B,0x40]
 		write_input_file(instr)

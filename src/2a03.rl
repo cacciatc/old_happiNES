@@ -708,7 +708,7 @@
 				break;
 			case 0xE5 :
 				temp = get_carry_flag();
-				check_for_carry(a_register,read_memory(zero_page(*p)) - (1-get_carry_flag()));
+				check_for_carry(a_register,read_memory(zero_page(*p)) - (1-temp));
 				a_register -= (read_memory(zero_page(*p)) - (1 - temp));
 				cycles -= 3;
 				break;

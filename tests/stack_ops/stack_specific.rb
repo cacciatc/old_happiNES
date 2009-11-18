@@ -26,7 +26,7 @@ class StackSpecificTest < Test::Unit::TestCase
 		f.close
 		assert_equal("FE",fstring[$s_line].chomp)
 		assert_equal("02",fstring[$stop_line].chomp)
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		
 		instr = []
 		#place a value in acc and push it

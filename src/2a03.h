@@ -228,21 +228,17 @@ class CPUCore {
 			if((value & (1 << 7))){
 				set_negative_flag();
 			}
-			else
+			if(!value)
 				clear_negative_flag();
 		}
 		void check_for_overflow(unsigned char value1,unsigned char value2){
 		 	if( (value1 & (1 << 7))^(value2 & (1 << 7)) ){
 				set_overflow_flag();
 		 	}
-			else
-				clear_overflow_flag();
 		}
 		void check_for_carry(unsigned char value1,unsigned char value2){
 			if( (value1 & (1 << 7))^(value2 & (1 << 7)) ){
 				set_carry_flag();
 		 	}
-			else
-				clear_carry_flag();
 		}
 };

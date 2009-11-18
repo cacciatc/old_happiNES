@@ -14,7 +14,7 @@ class LSRTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("7F",fstring[$a_line].chomp)
-		assert_equal("01",fstring[$status_line].chomp)
+		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x4A]
 		write_input_file(instr)

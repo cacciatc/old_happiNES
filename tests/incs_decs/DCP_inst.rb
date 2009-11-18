@@ -28,7 +28,7 @@ class DCPTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		assert_equal("7E",fstring[$m_line].split(" ")[2])
 		
 		instr = []
@@ -66,7 +66,7 @@ class DCPTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		assert_equal("7E",fstring[$m_line].split(" ")[2])
 		
 		instr = [0xA2,0x01]
@@ -105,7 +105,7 @@ class DCPTest < Test::Unit::TestCase
 		fstring = f.readlines
 		f.close
 		assert_equal("7E",fstring[$m_line].split(" ")[2])
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		
 		instr = []
 		(0..10).each do
@@ -142,7 +142,7 @@ class DCPTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		assert_equal("7E",fstring[$m_line].split(" ")[2])
 		
 		instr = [0xA2,0x01]
@@ -180,7 +180,7 @@ class DCPTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("00",fstring[$status_line].chomp)
+		assert_equal("80",fstring[$status_line].chomp)
 		assert_equal("7E",fstring[$m_line].split(" ")[2])
 		
 		instr = [0xA0,0x01]
