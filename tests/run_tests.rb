@@ -1,3 +1,4 @@
+require 'algorithms/algorithms'
 require 'load_store/load_store'
 require 'register_transfer/register_transfer'
 require 'stack_ops/stack_ops'
@@ -8,7 +9,6 @@ require 'jumps_calls/jumps_calls'
 require 'sys_funcs/sys_funcs'
 require 'branches/branches'
 require 'status_flag/status_flag'
-require 'algorithms/algorithms'
 require 'shifts/shifts'
 
 $a_line = 0
