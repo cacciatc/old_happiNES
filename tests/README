@@ -1,6 +1,6 @@
 This directory contains the following:
 
-algorithms - tests general algorithms and measures performance
+algorithms - tests general algorithms
 arithmetic - tests for arithmetic instructions
 incs_decs - tests increment and decrement instructions
 jumps_calls - tests jump and call instructions
