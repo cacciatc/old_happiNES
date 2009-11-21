@@ -1,7 +1,9 @@
 /*TODO
 ** -not counting cycles correctly for looking up across pages.
 */
-#include "2a03.h"
+#ifndef _2A03_H
+	#include "2a03.h"
+#endif
 		
 %%{
   machine cpu;
@@ -1809,22 +1811,5 @@ void CPUCore::load_debug_code(char* fname){
 }
 
 void CPUCore::load_ines(char* fname){
-	FILE* fp = fopen(fname,"rb");
-	int fsize;
 
-	if(!fp){
-		printf("Unable to open input file!\n");
-		exit(1);
-	}
-	
-	/*first read in header*/
-	/*now prg and char rom*/
-
-	fseek(fp,0,SEEK_END);
-  fsize = ftell(fp);
-	fseek(fp,0,SEEK_SET);
-  fread(&m[ROM_START],sizeof(unsigned char),fsize,fp);
-	p = &m[ROM_START];
-	pe = p + fsize;
-  fclose(fp);
 }

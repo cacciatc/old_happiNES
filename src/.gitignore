@@ -1,4 +1,8 @@
 2a03.c
 2a03.rl~
 2a03.h~
-cpu_instruction_test.cpp~
+cpu_instruction_test.c~
+ines.rl~
+ines.c~
+ines.h~
+ines_test.cpp~

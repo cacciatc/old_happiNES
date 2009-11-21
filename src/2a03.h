@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _INES_H
+	#include "ines.h"
+#endif
 
 #define PAGE_SIZE     256
 #define MY_STACK_SIZE 256
@@ -83,6 +86,17 @@ class CPUCore {
 		}
 		void write_memory(short address,unsigned char value){
     	m[address] = value;
+			/*mirrored memory*/
+			if(address >= 0x0000 && address <= 0x07FF){
+				m[address+0x0800] = value;
+				m[address+0x1000] = value;
+				m[address+0x1800] = value;
+			}
+			else if(address >= 0x2000 && address <= 0x2007){
+				for(int i=0x2008;i<0x4000;i+=8){
+					m[address+i] = value;
+				}
+			}
 		}
 
 		/*stack functions*/
