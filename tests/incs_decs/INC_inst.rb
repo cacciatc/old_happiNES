@@ -11,6 +11,7 @@ class INCTest < Test::Unit::TestCase
 		(0..254).each do
 			instr.push(0xE6,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -23,6 +24,7 @@ class INCTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xE6,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -35,6 +37,7 @@ class INCTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xE6,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -49,6 +52,7 @@ class INCTest < Test::Unit::TestCase
 		(0..254).each do
 			instr.push(0xF6,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -61,6 +65,7 @@ class INCTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xF6,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -73,6 +78,7 @@ class INCTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xF6,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -87,6 +93,7 @@ class INCTest < Test::Unit::TestCase
 		(0..254).each do
 			instr.push(0xEE,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -99,6 +106,7 @@ class INCTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xEE,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -111,6 +119,7 @@ class INCTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xEE,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -125,6 +134,7 @@ class INCTest < Test::Unit::TestCase
 		(0..254).each do
 			instr.push(0xFE,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -137,6 +147,7 @@ class INCTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xFE,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -149,6 +160,7 @@ class INCTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xFE,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

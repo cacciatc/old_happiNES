@@ -5,27 +5,26 @@
 	#include "ines.h"
 #endif
 
-#line 92 "src/ines.rl"
+#line 91 "src/ines.rl"
 
 
 
 #line 13 "src/ines.c"
 static const char _ines_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
-	3, 1, 4, 1, 5, 1, 8, 2, 
-	6, 8, 2, 7, 8
+	3, 1, 4, 1, 5, 1, 6, 1, 
+	7
 };
 
 static const char _ines_key_offsets[] = {
-	0, 0, 1, 2, 3, 4, 6, 8, 
-	10, 12, 14, 16, 17, 18, 19, 20, 
-	21, 22, 22
+	0, 0, 1, 2, 3, 4, 4, 4, 
+	4, 4, 4, 6, 7, 8, 9, 10, 
+	11, 12, 12
 };
 
 static const char _ines_trans_keys[] = {
-	78, 69, 83, 26, 0, 64, 0, 64, 
-	0, 127, 0, 127, 0, 127, 0, 1, 
-	0, 0, 0, 0, 0, 0, 0
+	78, 69, 83, 26, 0, 1, 0, 0, 
+	0, 0, 0, 0, 0
 };
 
 static const char _ines_single_lengths[] = {
@@ -35,31 +34,29 @@ static const char _ines_single_lengths[] = {
 };
 
 static const char _ines_range_lengths[] = {
-	0, 0, 0, 0, 0, 1, 1, 1, 
-	1, 1, 1, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 1, 0, 0, 0, 0, 0, 
 	0, 0, 0
 };
 
 static const char _ines_index_offsets[] = {
-	0, 0, 2, 4, 6, 8, 10, 12, 
-	14, 16, 18, 20, 22, 24, 26, 28, 
-	30, 32, 33
+	0, 0, 2, 4, 6, 8, 9, 10, 
+	11, 12, 13, 15, 17, 19, 21, 23, 
+	25, 27, 28
 };
 
 static const char _ines_trans_targs[] = {
 	2, 0, 3, 0, 4, 0, 5, 0, 
-	6, 0, 7, 0, 8, 0, 9, 0, 
-	10, 0, 11, 0, 12, 0, 13, 0, 
-	14, 0, 15, 0, 16, 0, 17, 0, 
-	17, 18, 0
+	6, 7, 8, 9, 10, 11, 0, 12, 
+	0, 13, 0, 14, 0, 15, 0, 16, 
+	0, 17, 0, 17, 18, 0
 };
 
 static const char _ines_trans_actions[] = {
-	0, 0, 0, 0, 0, 0, 13, 0, 
-	1, 0, 3, 0, 5, 0, 7, 0, 
-	9, 0, 11, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 13, 0, 
-	15, 18, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	1, 3, 5, 7, 9, 11, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 13, 15, 0
 };
 
 static const int ines_start = 1;
@@ -69,9 +66,14 @@ static const int ines_error = 0;
 static const int ines_en_main = 1;
 static const int ines_en_main_Ines_Chr = 18;
 
-#line 95 "src/ines.rl"
-INes::INes(char* fname){
+#line 94 "src/ines.rl"
 
+Ines::Ines(){
+	c_prg = 0;
+	c_chr = 0;
+}
+
+void Ines::load_rom(char* fname){
 	FILE* fp = fopen(fname,"rb");
 	int fsize;
 
@@ -80,25 +82,22 @@ INes::INes(char* fname){
 		exit(1);
 	}
 
-	c_count = 0;
-	c_prg = 0;
-	c_chr = 0;
-
 	fseek(fp,0,SEEK_END);
   fsize = ftell(fp);
 	fseek(fp,0,SEEK_SET);
+	p = (unsigned char*)malloc(fsize*sizeof(unsigned char));
   fread(p,sizeof(unsigned char),fsize,fp);
 	pe = p + fsize;
   fclose(fp);
 
 	
-#line 96 "src/ines.c"
+#line 95 "src/ines.c"
 	{
 	cs = ines_start;
 	}
-#line 117 "src/ines.rl"
+#line 118 "src/ines.rl"
 	
-#line 102 "src/ines.c"
+#line 101 "src/ines.c"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -175,18 +174,20 @@ _match:
 #line 11 "src/ines.rl"
 	{ 
     sz_prg = *p;
-    prg = (unsigned char*)malloc(sz_prg*sizeof(unsigned char)); 
+    prg = (unsigned char*)malloc(sz_prg*16*1024*sizeof(unsigned char));
   }
 	break;
 	case 1:
 #line 15 "src/ines.rl"
 	{ 
     sz_chr = *p;
-    chr = (unsigned char*)malloc(sz_chr*sizeof(unsigned char));  
+		if(sz_chr == 0)
+			sz_chr = 1;
+    chr = (unsigned char*)malloc(sz_chr*8*1024*sizeof(unsigned char));  
   }
 	break;
 	case 2:
-#line 19 "src/ines.rl"
+#line 21 "src/ines.rl"
 	{ 
     vertical_mirroring   = (*p) & (1<<0) ? false : true;
     horizontal_mirroring = !vertical_mirroring;  
@@ -197,53 +198,48 @@ _match:
   }
 	break;
 	case 3:
-#line 27 "src/ines.rl"
+#line 29 "src/ines.rl"
 	{
     vs_system = (*p) & (1<<0) ? false : true;
   }
 	break;
 	case 4:
-#line 30 "src/ines.rl"
+#line 32 "src/ines.rl"
 	{ 
 		sz_ram = *p; 
 	}
 	break;
 	case 5:
-#line 33 "src/ines.rl"
+#line 35 "src/ines.rl"
 	{
     pal  = (*p) & (1<<0) ? false : true;
   }
 	break;
 	case 6:
-#line 36 "src/ines.rl"
+#line 38 "src/ines.rl"
 	{
-    if(c_prg > sz_prg){
+    if(c_prg > get_prg_size()){
       {cs = 18; goto _again;}
 		}
     else{
-      prg[c_prg] = *p;
+      prg[c_prg] = (unsigned char)*p;
 			c_prg++;
 		}
   }
 	break;
 	case 7:
-#line 45 "src/ines.rl"
+#line 47 "src/ines.rl"
 	{ 
-    if(c_chr > sz_chr){
+    if(c_chr > get_chr_size()){
+			{p++; goto _out; }
 		} 
     else{
-      chr[c_chr] = *p;
+      chr[c_chr] = (unsigned char)*p;
 			c_chr++;
     }
   }
 	break;
-	case 8:
-#line 54 "src/ines.rl"
-	{
-		c_count++;
-	}
-	break;
-#line 247 "src/ines.c"
+#line 243 "src/ines.c"
 		}
 	}
 
@@ -255,5 +251,12 @@ _again:
 	_test_eof: {}
 	_out: {}
 	}
-#line 118 "src/ines.rl"
+#line 119 "src/ines.rl"
+	if(!p)
+		free(p);
+}
+
+void Ines::clean_up(){
+	if(!p)
+		free(p);
 }

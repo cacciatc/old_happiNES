@@ -8,7 +8,7 @@ class AACTest < Test::Unit::TestCase
 	end
 
 	def test_addr_immediate
-		instr = [0xA9,0xC0,0x0B,0xCC]
+		instr = [0xA9,0xC0,0x0B,0xCC,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -17,7 +17,7 @@ class AACTest < Test::Unit::TestCase
 		assert_equal("C0",fstring[$a_line].chomp)
 		assert_equal("C0",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0xC0,0x2B,0xCC]
+		instr = [0xA9,0xC0,0x2B,0xCC,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -26,7 +26,7 @@ class AACTest < Test::Unit::TestCase
 		assert_equal("C0",fstring[$a_line].chomp)
 		assert_equal("C0",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x80,0x0B,0x00]
+		instr = [0xA9,0x80,0x0B,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -35,7 +35,7 @@ class AACTest < Test::Unit::TestCase
 		assert_equal("80",fstring[$a_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x80,0x2B,0x00]
+		instr = [0xA9,0x80,0x2B,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -44,7 +44,7 @@ class AACTest < Test::Unit::TestCase
 		assert_equal("80",fstring[$a_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x11,0x0B,0x01]
+		instr = [0xA9,0x11,0x0B,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -53,7 +53,7 @@ class AACTest < Test::Unit::TestCase
 		assert_equal("11",fstring[$a_line].chomp)
 		assert_equal("00",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x11,0x2B,0x01]
+		instr = [0xA9,0x11,0x2B,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

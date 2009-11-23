@@ -8,7 +8,7 @@ class AAXTest < Test::Unit::TestCase
 	end
 
 	def test_addr_zero_page
-		instr = [0xA9,0x80,0xA2,0x80,0x87,0x00]
+		instr = [0xA9,0x80,0xA2,0x80,0x87,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -17,7 +17,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("80",fstring[$m_line].split(" ")[1])
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x80,0xA2,0x08,0x87,0x00]
+		instr = [0xA9,0x80,0xA2,0x08,0x87,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -26,7 +26,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$m_line].split(" ")[1])
 		assert_equal("02",fstring[$status_line].chomp)
 
-		instr = [0xA9,0x11,0xA2,0x01,0x87,0x00]
+		instr = [0xA9,0x11,0xA2,0x01,0x87,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -37,7 +37,7 @@ class AAXTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_zero_page_y
-		instr = [0xA9,0x80,0xA2,0x80,0xA0,0x00,0x97,0x00]
+		instr = [0xA9,0x80,0xA2,0x80,0xA0,0x00,0x97,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -46,7 +46,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("80",fstring[$m_line].split(" ")[1])
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x08,0xA2,0x80,0xA0,0x00,0x97,0x00]
+		instr = [0xA9,0x08,0xA2,0x80,0xA0,0x00,0x97,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -55,7 +55,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$m_line].split(" ")[1])
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x11,0xA2,0x01,0xA0,0x00,0x97,0x00]
+		instr = [0xA9,0x11,0xA2,0x01,0xA0,0x00,0x97,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -66,7 +66,7 @@ class AAXTest < Test::Unit::TestCase
 	end
 	
 	def test_addr_mode_absolute
-		instr = [0xA9,0x80,0xA2,0x80,0x8F,0x00,0x00]
+		instr = [0xA9,0x80,0xA2,0x80,0x8F,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -75,7 +75,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("80",fstring[$m_line].split(" ")[1])
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x08,0xA2,0x80,0x8F,0x00,0x00]
+		instr = [0xA9,0x08,0xA2,0x80,0x8F,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -84,7 +84,7 @@ class AAXTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$m_line].split(" ")[1])
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x11,0xA2,0x01,0x8F,0x00,0x00]
+		instr = [0xA9,0x11,0xA2,0x01,0x8F,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -95,7 +95,7 @@ class AAXTest < Test::Unit::TestCase
 	end
 	
 	def test_addr_mode_indirect_x
-		instr = [0xA9,0x80,0xA2,0x00,0x83,0x00]
+		instr = [0xA9,0x80,0xA2,0x00,0x83,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

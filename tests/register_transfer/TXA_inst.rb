@@ -8,7 +8,7 @@ class TXATest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0xA2,0x00,0x8A]
+		instr = [0xA2,0x00,0x8A,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -18,7 +18,7 @@ class TXATest < Test::Unit::TestCase
 		assert_equal("00",fstring[$x_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0xC8,0x8A]
+		instr = [0xA2,0xC8,0x8A,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -28,7 +28,7 @@ class TXATest < Test::Unit::TestCase
 		assert_equal("C8",fstring[$x_line].chomp)
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x30,0x8A]
+		instr = [0xA2,0x30,0x8A,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

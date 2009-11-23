@@ -4,9 +4,12 @@
 #ifndef _STDLIB_H
 	#include <stdlib.h>
 #endif
+#ifndef _STRING_H
+	#include <string.h>
+#endif
 
 
-class INes {
+class Ines {
 	private:
 		/*size of program memory*/		
 		int sz_prg;
@@ -20,7 +23,6 @@ class INes {
 		int sz_ram;
 
 		/*used to count read chars from file*/
-		int c_count;
 		int c_prg;
 		int c_chr;
 
@@ -48,18 +50,26 @@ class INes {
 		bool pal;
 
 	public:
-		INes(char *fname);
+		Ines();
+		/*loads a nes file*/
+		void load_rom(char* fname);
+		/*release memory, etc*/
+		void clean_up();
+		/*returns a pointer to prg*/
 		void get_prg(unsigned char* m){
-			m = prg;
+			memcpy(m,prg,get_prg_size());
 		}
+		/*returns a pointer to chr*/
 		void get_chr(unsigned char* m){
 			m = chr;
 		}
+		/*return the prg size in kb*/
 		int get_prg_size(void){
-			return sz_prg;
+			return sz_prg*16*1024;
 		}
+		/*returns the chr size in kb*/
 		int get_chr_size(void){
-			return sz_chr;
+			return sz_chr*8*1024;
 		}
 		int get_map_type(void){
 			return map_type;

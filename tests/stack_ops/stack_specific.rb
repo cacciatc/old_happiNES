@@ -18,7 +18,7 @@ class StackSpecificTest < Test::Unit::TestCase
 		instr.push(0xA9)
 		instr.push(0x02)
 		instr.push(0x48)
-		
+		instr.push(0x02)	
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -41,6 +41,7 @@ class StackSpecificTest < Test::Unit::TestCase
 		(0..256).each do |i|
 			instr.push(0x68)
 		end
+		instr.push(0x02)	
 		
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
@@ -63,6 +64,7 @@ class StackSpecificTest < Test::Unit::TestCase
 		instr.push(0xA9)
 		instr.push(0x00)
 		instr.push(0x08)
+		instr.push(0x02)	
 		
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
@@ -86,6 +88,7 @@ class StackSpecificTest < Test::Unit::TestCase
 		(0..256).each do |i|
 			instr.push(0x28)
 		end
+		instr.push(0x02)	
 		
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")

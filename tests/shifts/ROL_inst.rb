@@ -8,6 +8,7 @@ class ROLTest < Test::Unit::TestCase
 
 	def test_addr_mode_accumulator
 		instr = [0xA9,0xFF,0x2A]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -17,6 +18,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0x38,0xA9,0xFF,0x2A]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -26,6 +28,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x2A]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -35,6 +38,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$status_line].chomp)
 
 		instr = [0xA9,0x00,0x2A]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -46,6 +50,7 @@ class ROLTest < Test::Unit::TestCase
 
 	def test_addr_mode_zero_page
 		instr = [0xA9,0xFF,0x85,0x55,0xA9,0x00,0x26,0x55,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -55,6 +60,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0x38,0xA9,0xFF,0x85,0x55,0xA9,0x00,0x26,0x55,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -64,6 +70,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x85,0x55,0xA9,0x00,0x26,0x55,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -73,6 +80,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x00,0x85,0x55,0xA9,0x00,0x26,0x55,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -84,6 +92,7 @@ class ROLTest < Test::Unit::TestCase
 	
 	def test_addr_mode_zero_page_x
 		instr = [0xA9,0xFF,0x85,0x55,0xA9,0x00,0xA2,0x10,0x36,0x45,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -93,6 +102,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0x38,0xA9,0xFF,0x85,0x55,0xA9,0x00,0xA2,0x10,0x36,0x45,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -102,6 +112,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x85,0x55,0xA9,0x00,0xA2,0x10,0x36,0x45,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -111,6 +122,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x00,0x85,0x55,0xA9,0x00,0xA2,0x10,0x36,0x45,0xA5,0x55]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -122,6 +134,7 @@ class ROLTest < Test::Unit::TestCase
 
 	def test_addr_mode_absolute
 		instr = [0xA9,0xFF,0x85,0x45,0xA9,0x00,0x2E,0x45,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -131,6 +144,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0x38,0xA9,0xFF,0x85,0x45,0xA9,0x00,0x2E,0x45,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -140,6 +154,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x85,0x45,0xA9,0x00,0x2E,0x45,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -149,6 +164,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x00,0x85,0x45,0xA9,0x00,0x2E,0x45,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -160,6 +176,7 @@ class ROLTest < Test::Unit::TestCase
 	
 	def test_addr_mode_absolute_x
 		instr = [0xA9,0xFF,0x85,0x45,0xA9,0x00,0xA2,0x10,0x3E,0x35,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -169,6 +186,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0x38,0xA9,0xFF,0x85,0x45,0xA9,0x00,0xA2,0x10,0x3E,0x35,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -178,6 +196,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("81",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x04,0x85,0x45,0xA9,0x00,0xA2,0x10,0x3E,0x35,0x00,0xA5,0x45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -187,6 +206,7 @@ class ROLTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$status_line].chomp)
 		
 		instr = [0xA9,0x00,0x85,0x45,0xA9,0x00,0xA2,0x10,0x3E,0x35,0x00,0xA5,0X45]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

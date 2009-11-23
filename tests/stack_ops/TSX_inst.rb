@@ -8,7 +8,7 @@ class TSXTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0xBA]
+		instr = [0xBA,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

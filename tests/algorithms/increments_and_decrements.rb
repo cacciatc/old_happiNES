@@ -8,7 +8,7 @@ class IncrementsAndDecrementsTest < Test::Unit::TestCase
 
 	def test_16_bit_increment
 		instr = [0xA9,0xFF,0x85,0x00]
-		instr = instr + [0xE6,0x00,0xD0,0x02,0xE6,0x01]
+		instr = instr + [0xE6,0x00,0xD0,0x02,0xE6,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -21,7 +21,7 @@ class IncrementsAndDecrementsTest < Test::Unit::TestCase
 	
 	def test_16_bit_decrement
 		instr = [0xA9,0x00,0x85,0x00]
-		instr = instr + [0xC6,0x00,0xD0,0x02,0xC6,0x01]
+		instr = instr + [0xC6,0x00,0xD0,0x00,0xC6,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

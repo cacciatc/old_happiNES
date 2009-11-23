@@ -7,7 +7,7 @@ class CLVTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0xB8,0xB8]
+		instr = [0xB8,0xB8,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -15,7 +15,7 @@ class CLVTest < Test::Unit::TestCase
 		f.close
 		assert_equal("00",fstring[$status_line].chomp)
 	
-		instr = [0xA9,0xFF,0x69,0x01,0xB8]
+		instr = [0xA9,0xFF,0x69,0x01,0xB8,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

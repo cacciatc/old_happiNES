@@ -7,7 +7,7 @@ class SEITest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0x58,0x78]
+		instr = [0x58,0x78,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -15,7 +15,7 @@ class SEITest < Test::Unit::TestCase
 		f.close
 		assert_equal("04",fstring[$status_line].chomp)
 	
-		instr = [0x78,0x58,0x78,0x78]
+		instr = [0x78,0x58,0x78,0x78,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

@@ -13,7 +13,7 @@ class BCSTest < Test::Unit::TestCase
 		end
 		instr[2] = 0x38
 		instr[3] = 0xB0
-		instr[4] = 0x03
+		instr[4] = 0x01
 		instr[5] = 0x02
 		instr[6] = 0xA9
 		instr[7] = 0x09
@@ -31,7 +31,7 @@ class BCSTest < Test::Unit::TestCase
 		end
 		instr[2] = 0x18
 		instr[3] = 0xB0
-		instr[4] = 0x03
+		instr[4] = 0x01
 		instr[5] = 0x02
 		instr[6] = 0xA9
 		instr[7] = 0x09

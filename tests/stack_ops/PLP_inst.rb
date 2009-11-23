@@ -7,7 +7,7 @@ class PLPTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0xA9,0xC8,0x08,0xA9,0x01,0x28]
+		instr = [0xA9,0xC8,0x08,0xA9,0x01,0x28,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -16,7 +16,7 @@ class PLPTest < Test::Unit::TestCase
 		assert_equal("FF",fstring[$s_line].chomp)
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x00,0x08,0xA9,0x01,0x28]
+		instr = [0xA9,0x00,0x08,0xA9,0x01,0x28,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -25,7 +25,7 @@ class PLPTest < Test::Unit::TestCase
 		assert_equal("FF",fstring[$s_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x01,0x08,0xA9,0xC8,0x28]
+		instr = [0xA9,0x01,0x08,0xA9,0xC8,0x28,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

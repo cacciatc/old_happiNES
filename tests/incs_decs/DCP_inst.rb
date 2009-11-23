@@ -11,6 +11,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xC7,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -23,6 +24,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..129).each do
 			instr.push(0xC7,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -35,6 +37,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xC7,0x01)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -49,6 +52,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xD7,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -61,6 +65,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..129).each do
 			instr.push(0xD7,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -73,6 +78,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xD7,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -87,6 +93,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xCF,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -99,6 +106,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..129).each do
 			instr.push(0xCF,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -111,6 +119,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xCF,0x01,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -125,6 +134,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xDF,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -137,6 +147,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..129).each do
 			instr.push(0xDF,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -149,6 +160,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xDF,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -163,6 +175,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..255).each do
 			instr.push(0xDB,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -175,6 +188,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..129).each do
 			instr.push(0xDB,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -187,6 +201,7 @@ class DCPTest < Test::Unit::TestCase
 		(0..10).each do
 			instr.push(0xDB,0x00,0x00)
 		end
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -198,6 +213,7 @@ class DCPTest < Test::Unit::TestCase
 	
 	def test_addr_mode_indirect_x
 		instr = [0xA2,0x00,0xC3,0x00]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -209,6 +225,7 @@ class DCPTest < Test::Unit::TestCase
 	
 	def test_addr_mode_indirect_y
 		instr = [0xA0,0x00,0xD3,0x00]
+		instr.push(0x02)
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

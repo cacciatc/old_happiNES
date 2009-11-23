@@ -21,7 +21,7 @@ class JSRTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("04",fstring[$x_line].chomp)
+		assert_equal("02",fstring[$x_line].chomp)
 	
 		instr = []	
 		(0..255).each do
@@ -41,7 +41,7 @@ class JSRTest < Test::Unit::TestCase
 		f = File.new(@temp_file)
 		fstring = f.readlines
 		f.close
-		assert_equal("04",fstring[$x_line].chomp)
+		assert_equal("02",fstring[$x_line].chomp)
 	end
 	
 	def teardown

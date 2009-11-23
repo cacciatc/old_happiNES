@@ -10,11 +10,13 @@
   #actions
   action get_prg_size { 
     sz_prg = *p;
-    prg = (unsigned char*)malloc(sz_prg*sizeof(unsigned char)); 
+    prg = (unsigned char*)malloc(sz_prg*16*1024*sizeof(unsigned char));
   }
   action get_chr_size { 
     sz_chr = *p;
-    chr = (unsigned char*)malloc(sz_chr*sizeof(unsigned char));  
+		if(sz_chr == 0)
+			sz_chr = 1;
+    chr = (unsigned char*)malloc(sz_chr*8*1024*sizeof(unsigned char));  
   }
   action get_options  { 
     vertical_mirroring   = (*p) & (1<<0) ? false : true;
@@ -34,35 +36,32 @@
     pal  = (*p) & (1<<0) ? false : true;
   }
   action get_next_prg_byte{
-    if(c_prg > sz_prg){
+    if(c_prg > get_prg_size()){
       fgoto Chr;
 		}
     else{
-      prg[c_prg] = *p;
+      prg[c_prg] = (unsigned char)*p;
 			c_prg++;
 		}
   }
   action get_next_chr_byte{ 
-    if(c_chr > sz_chr){
+    if(c_chr > get_chr_size()){
+			fbreak;
 		} 
     else{
-      chr[c_chr] = *p;
+      chr[c_chr] = (unsigned char)*p;
 			c_chr++;
     }
   }
   
-	action cyclic_tasks {
-		c_count++;
-	}
-  
   #events
   #header events
   header_preamble = "NES" . 0x1A;
-  prg_size        = 0..64 @get_prg_size;
-  chr_size        = 0..64 @get_chr_size;
-  opt_flags       = ascii @get_options;
-  vs_syste        = ascii @get_vs_system;
-  ram_size        = ascii @get_ram_size;
+  prg_size        = extend @get_prg_size;
+  chr_size        = extend @get_chr_size;
+  opt_flags       = extend @get_options;
+  vs_syste        = extend @get_vs_system;
+  ram_size        = extend @get_ram_size;
   disp_info       = 0..1  @get_disp_info;
   header_end      = 0 {6};
   
@@ -73,27 +72,32 @@
   Ines = (
     start: (
       header_preamble -> Header
-    ) @cyclic_tasks,
+    ),
     
     Header: (
       prg_size . chr_size . opt_flags .vs_syste . ram_size . disp_info . header_end -> Prg
-    ) @cyclic_tasks,
+    ),
     
     Prg: (
       prg
-    ) @cyclic_tasks,
+    ),
     
     Chr: (
       chr
-    ) @cyclic_tasks
+    )
   );
   
   main := Ines;
 }%%
 
 %%write data;
-INes::INes(char* fname){
 
+Ines::Ines(){
+	c_prg = 0;
+	c_chr = 0;
+}
+
+void Ines::load_rom(char* fname){
 	FILE* fp = fopen(fname,"rb");
 	int fsize;
 
@@ -102,17 +106,21 @@ INes::INes(char* fname){
 		exit(1);
 	}
 
-	c_count = 0;
-	c_prg = 0;
-	c_chr = 0;
-
 	fseek(fp,0,SEEK_END);
   fsize = ftell(fp);
 	fseek(fp,0,SEEK_SET);
+	p = (unsigned char*)malloc(fsize*sizeof(unsigned char));
   fread(p,sizeof(unsigned char),fsize,fp);
 	pe = p + fsize;
   fclose(fp);
 
 	%%write init;
 	%%write exec;
+	if(!p)
+		free(p);
+}
+
+void Ines::clean_up(){
+	if(!p)
+		free(p);
 }

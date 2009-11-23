@@ -16,7 +16,7 @@ class BVSTest < Test::Unit::TestCase
 		instr[3] = 0x69 
 		instr[4] = 0x01
 		instr[5] = 0x70
-		instr[6] = 0x03
+		instr[6] = 0x01
 		instr[7] = 0x02
 		instr[8] = 0xA9
 		instr[9] = 0x09

@@ -62,9 +62,9 @@
     push(p-m-ROM_START+1);
     push(status);
     /*load interrupt vector*/
-    schedule_jump(read_memory(IRQ+1)*256 + read_memory(IRQ));
+    schedule_jump(IRQ-ROM_START);
     set_break_flag();
- 		set_interrupt_disable_flag();   
+ 		set_interrupt_disable_flag();
 		cycles -= 7;
   }
   action return_from_interrupt {
@@ -624,7 +624,7 @@
 	}
 	action logical_and_x_with_accumulator_store_in_stack {
 		pstack = x_register & a_register;
-		write_memory(absolute_y(*p,*(p-1)),(pstack & *p) + 1);		
+		write_memory(absolute_y(*p,*(p-1)),(pstack & ((*p)+1)) );		
 		cycles -= 5;
 	}
 
@@ -1170,7 +1170,7 @@
 	}
 	action jump_to_subroutine {
 		push(p-m-ROM_START+1);		
-		schedule_jump(absolute(*p,*(p-1)));
+		schedule_jump(absolute(*p,*(p-1))-ROM_START);
 		cycles -= 6;
 	}
 	action return_from_subroutine {		
@@ -1189,7 +1189,7 @@
 	}
 	action branch_if_carry_set {
 		if(get_carry_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1197,7 +1197,7 @@
 	}
 	action branch_if_equal {
 		if(get_zero_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1205,7 +1205,7 @@
 	}
 	action branch_if_not_equal {
 		if(!get_zero_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1213,7 +1213,7 @@
 	}
 	action branch_if_minus {
 		if(get_negative_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1221,7 +1221,7 @@
 	}
 	action branch_if_positive {
 		if(!get_negative_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1229,7 +1229,7 @@
 	}
 	action branch_if_overflow_clear {
 		if(!get_overflow_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1237,7 +1237,7 @@
 	}
 	action branch_if_overflow_set {
 		if(get_overflow_flag()){
-			schedule_relative_jump(*p);
+			schedule_relative_jump((*p)+2);
 			cycles -= 1;
 		}
 		/*currently not accounting for if new address is on a different page*/
@@ -1591,13 +1591,14 @@
   #special actions
   action cyclic_tasks {
 		if(is_debug){
-			printf("[0x%.4X] ",(unsigned int)(p-arg_count));
+			step();
+			printf("[0x%.4X] ",(unsigned int)(p-arg_count-m));
   		for(int i = arg_count; i >= 0;i--){
-    		printf("0x%.4X ",*(p-i));
+    		printf("0x%.2X ",*(p-i));
   		}
   		printf("\n");
 		}
-		
+
     if(cycles <= 0){
       cycles += interrupt_period;
     }
@@ -1610,10 +1611,9 @@
 			p = jump_address;
 			fexec p;
 		}
-		if(is_debug){
-			cs = fcurs;
-			fbreak;
-		}
+
+		//emulate sound
+		//emulate ppu
   }
  
   #system functions
@@ -1752,35 +1752,93 @@ CPUCore::CPUCore(){
 }
 
 void CPUCore::run(){
-	%%write exec;
+	%%write exec noend;
 }
 
 void CPUCore::step(){
 	char cmd = 0;	
-	is_debug = 1;
+	bool done = false;
+	int i,j;
+	int page_number = 0;
 
-	%%write exec;
-
-	printf("[0x%.4X] ",(unsigned int)(p-arg_count));
-  for(int i = arg_count; i >= 0;i--){
-    printf("0x%.4X ",*(p-i));
-  }
-  printf("\n");
-	while(cmd != 'n'){
-		scanf("%c",&cmd);
+	while(!done){
+		printf("[2a03bug] ");
+		scanf(" %c",&cmd);
 		switch(cmd){
 			case 'd' :
+				/*dump registers*/
 				printf("a : 0x%X\n",a_register);
 				printf("x : 0x%X\n",x_register);
 				printf("y : 0x%X\n",y_register);
 				printf("s : 0x%X\n",status);
 				break;
 			case 'n':
-				break;				
+				/*step next*/
+				done = true;
+				break;
+			case 'r':
+				/*dump ROM size*/
+				printf("prg size: %i\n",rom.get_prg_size());
+				printf("chr size: %i\n",rom.get_prg_size());
+				break;
+			case 's':
+				/*dump stack*/
+				for(i=0;i<32;i++){
+					for(j=0;j<8;j++){					
+						printf("  [0x%04X] %02X  ",STACK_OFFSET+i+j*32,m[STACK_OFFSET+i+j*32]);
+					}
+					printf("\n");
+				}
+				break;
+			case 'p':
+				printf("[0x%X] %2X\n",p-m,*p);
+				break;
+			case 'm':
+				scanf(" %i",&page_number);
+				for(i=page_number*PAGE_SIZE;i<32+page_number*PAGE_SIZE;i++){
+					for(j=0;j<8;j++){					
+						printf("  [0x%04X] %02X  ",i+j*32,m[i+j*32]);
+					}
+					printf("\n");
+				}
+				break;
+			case 'c':
+				system("clear");
+				break;
+			case 'j':
+				scanf(" %x",&page_number);
+				page_number %= PAGE_SIZE;
+				printf("page - %i\n",page_number);
+				for(i=page_number*PAGE_SIZE;i<32+page_number*PAGE_SIZE;i++){
+					for(j=0;j<8;j++){					
+						printf("  [0x%04X] %02X  ",i+j*32,m[i+j*32]);
+					}
+					printf("\n");
+				}
+				break;
+			case 'q':
+				/*quit debug and program*/
+				clean_up();
+				exit(0);
+			case 'o':
+				printf("[0x%X] %2X\n",p-arg_count-m,*(p-arg_count));
+				break;
+			case 'h':
+				/*dump help*/
+				printf("c - clear screen\n");
+				printf("o - print last executed instruction\n");
+				printf("d - dump register contents\n");
+				printf("n - execute next instruction\n");
+				printf("r - dump ROM size\n");
+				printf("s - dump stack contents\n");
+				printf("p - dump next instruction\n");
+				printf("m - print prg mem pages\n");
+				printf("j - print prg mem page containing supplied addr\n");
+				printf("q - quit debug\n");
 			default :
 				break;
 		}
-	}	
+	}
 }
 
 void CPUCore::dump_core(CPUCore_dump* core){
@@ -1811,5 +1869,18 @@ void CPUCore::load_debug_code(char* fname){
 }
 
 void CPUCore::load_ines(char* fname){
+	rom = Ines();
+	rom.load_rom(fname);
+	rom.get_prg(&m[ROM_START]);
+	rom.get_prg(&m[0xC000]);
+	p = &m[ROM_START];
+	pe = p+rom.get_prg_size();
+}
 
+void reset(){
+
+}
+
+void CPUCore::clean_up(){
+	rom.clean_up();
 }

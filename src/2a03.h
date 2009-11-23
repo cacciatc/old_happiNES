@@ -65,6 +65,9 @@ class CPUCore {
 		/*used to determine if debugging*/
 		int is_debug;
 
+		/*holds ROM info*/
+		Ines rom;
+
 		public:
 		/*constructor*/
 		CPUCore();
@@ -78,6 +81,17 @@ class CPUCore {
 		void load_debug_code(char* fname);
 		/*dumps part of the zero page and registers, used for testing*/
 		void dump_core(CPUCore_dump*);
+		/*issues a reset IRQ*/
+		void reset();
+		/*sets debug mode*/		
+		void set_debug(){
+			is_debug = true;
+		}
+		/*clears debug*/
+		void clear_debug(){
+			is_debug = false;
+		}
+		void clean_up();
 
 		private:
 		/*memory functions*/

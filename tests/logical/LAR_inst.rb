@@ -8,7 +8,7 @@ class LARTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_absolute_y
-		instr = [0xA9,0xFF,0x85,0x00,0xA0,0x00,0xBB,0x00,0x00]
+		instr = [0xA9,0xFF,0x85,0x00,0xA0,0x00,0xBB,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -19,7 +19,7 @@ class LARTest < Test::Unit::TestCase
 		assert_equal("FF",fstring[$s_line].chomp)
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xBB,0x00,0x00]
+		instr = [0xBB,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -30,7 +30,7 @@ class LARTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$s_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x0F,0x85,0x00,0xA0,0x00,0xBB,0x00,0x00]
+		instr = [0xA9,0x0F,0x85,0x00,0xA0,0x00,0xBB,0x00,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

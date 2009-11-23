@@ -8,7 +8,7 @@ class CPXTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_immediate
-		instr = [0xA2,0x03,0xE0,0x01]
+		instr = [0xA2,0x03,0xE0,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -16,7 +16,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("01",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x03,0xE0,0x03]
+		instr = [0xA2,0x03,0xE0,0x03,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -24,7 +24,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("03",fstring[$status_line].chomp)
 
-		instr = [0xA2,0x80,0xE0,0x90]
+		instr = [0xA2,0x80,0xE0,0x90,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -34,7 +34,7 @@ class CPXTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_zero_page
-		instr = [0xA2,0x01,0x86,0x01,0xA9,0x01,0xE4,0x03]
+		instr = [0xA2,0x01,0x86,0x01,0xA9,0x01,0xE4,0x03,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -42,7 +42,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("01",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x03,0x86,0x01,0xE4,0x01]
+		instr = [0xA2,0x03,0x86,0x01,0xE4,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -50,7 +50,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("03",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x80,0x86,0x01,0xA2,0x90,0xE4,0x01]
+		instr = [0xA2,0x80,0x86,0x01,0xA2,0x90,0xE4,0x01,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -60,7 +60,7 @@ class CPXTest < Test::Unit::TestCase
 	end
 	
 	def test_addr_mode_absolute
-		instr = [0xA2,0x01,0x86,0x01,0xA2,0x03,0xEC,0x01,0x00]
+		instr = [0xA2,0x01,0x86,0x01,0xA2,0x03,0xEC,0x01,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -68,7 +68,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("01",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x03,0x86,0x01,0xEC,0x01,0x00]
+		instr = [0xA2,0x03,0x86,0x01,0xEC,0x01,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -76,7 +76,7 @@ class CPXTest < Test::Unit::TestCase
 		f.close
 		assert_equal("03",fstring[$status_line].chomp)
 		
-		instr = [0xA2,0x80,0x86,0x01,0xA2,0x90,0xEC,0x01,0x00]
+		instr = [0xA2,0x80,0x86,0x01,0xA2,0x90,0xEC,0x01,0x00,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

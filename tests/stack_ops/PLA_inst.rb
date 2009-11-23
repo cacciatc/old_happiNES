@@ -7,7 +7,7 @@ class PLATest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_implied
-		instr = [0xA9,0x01,0x48,0xA9,0x00,0x68]
+		instr = [0xA9,0x01,0x48,0xA9,0x00,0x68,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -17,7 +17,7 @@ class PLATest < Test::Unit::TestCase
 		assert_equal("01",fstring[$a_line].chomp)
 		assert_equal("00",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0xC8,0x48,0xA9,0x00,0x68]
+		instr = [0xA9,0xC8,0x48,0xA9,0x00,0x68,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -27,7 +27,7 @@ class PLATest < Test::Unit::TestCase
 		assert_equal("C8",fstring[$a_line].chomp)
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x00,0x48,0xA9,0xC8,0x68]
+		instr = [0xA9,0x00,0x48,0xA9,0xC8,0x68,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)

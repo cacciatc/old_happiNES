@@ -8,7 +8,7 @@ class ASRTest < Test::Unit::TestCase
 	end
 
 	def test_addr_mode_immediate
-		instr = [0xA9,0xFF,0x4B,0xFF]
+		instr = [0xA9,0xFF,0x4B,0xFF,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -17,7 +17,7 @@ class ASRTest < Test::Unit::TestCase
 		assert_equal("7F",fstring[$a_line].chomp)
 		assert_equal("80",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x00,0x4B,0x40]
+		instr = [0xA9,0x00,0x4B,0x40,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
@@ -26,7 +26,7 @@ class ASRTest < Test::Unit::TestCase
 		assert_equal("00",fstring[$a_line].chomp)
 		assert_equal("02",fstring[$status_line].chomp)
 		
-		instr = [0xA9,0x11,0x4B,0x10]
+		instr = [0xA9,0x11,0x4B,0x10,0x02]
 		write_input_file(instr)
 		system(".././2a03 #{@input_file} #{@temp_file}")
 		f = File.new(@temp_file)
