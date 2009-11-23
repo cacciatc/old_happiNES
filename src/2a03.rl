@@ -1795,6 +1795,8 @@ void CPUCore::step(){
 				break;
 			case 'm':
 				scanf(" %i",&page_number);
+				if(page_number > 255)
+					break;
 				for(i=page_number*PAGE_SIZE;i<32+page_number*PAGE_SIZE;i++){
 					for(j=0;j<8;j++){					
 						printf("  [0x%04X] %02X  ",i+j*32,m[i+j*32]);
@@ -1807,7 +1809,9 @@ void CPUCore::step(){
 				break;
 			case 'j':
 				scanf(" %x",&page_number);
-				page_number %= PAGE_SIZE;
+				if(page_number > 0xFFFF)
+					break;
+				page_number /= PAGE_SIZE;
 				printf("page - %i\n",page_number);
 				for(i=page_number*PAGE_SIZE;i<32+page_number*PAGE_SIZE;i++){
 					for(j=0;j<8;j++){					
