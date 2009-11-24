@@ -9,14 +9,14 @@
 
 -Roadmap-
 	Following is a general guideline leading up to version 1.0:
-		-0.2  Complete 2a03 core (including sound) and finish undocumented opcodes.
+		-0.2  Complete 2a03 core (including sound).
 		-0.3  Complete PPU (Picture Processing Unit).
 		-0.4  Support iNES ROMS and certain MMUs.
 		-0.5  GUI.
 		-0.6  Savestate functionality.
 		-0.7  Recording.
 		-0.8  Networking.
-		-0.9  ROM support check.
+		-0.9  ROM support check and finished undocumented opcodes.
 		-1.0  Fully functional emulator.
 
 -Running-
@@ -40,6 +40,12 @@ LICENSE
 	-Licensing file.
 make.rb
 	-Ruby script that compiles CPU core and then runs tests.
+
+-Dependencies-
+	-ragel 
+	-SDL
+	-ruby
+	-g++
 
 -Resources-
 	We are currently using the following sites for opcode specs:

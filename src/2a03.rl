@@ -1,5 +1,6 @@
 /*TODO
 ** -not counting cycles correctly for looking up across pages.
+** -until memory mappers are implemented the load_nes function simply duplicates ROM into 0x8000 and 0xC000
 */
 #ifndef _2A03_H
 	#include "2a03.h"
@@ -1747,6 +1748,9 @@ CPUCore::CPUCore(){
 	is_debug  = 0;	
 	pstack    = MY_STACK_SIZE-1;
 	is_jump_planned = 0;
+
+	/*create pAPU*/
+	papu = pAPU();
 
 	%%write init;
 }

@@ -1,15 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+/*
+**  This class represents a 2a03 chip.  
+**  author: cacciatc
+**  Note: A lot of the smaller methods are coded here in this header file to keep clutter out of the .rl file.
+*/
+
+#ifndef _STDIO_H
+	#include <stdio.h>
+#endif
+#ifndef _STDLIB_H
+	#include <stdlib.h>
+#endif
+#ifndef _STRING_H
+	#include <string.h>
+#endif
 #ifndef _INES_H
 	#include "ines.h"
+#endif
+#ifndef _PAPU_H
+	#include "pAPU.h"
 #endif
 
 #define PAGE_SIZE     256
 #define MY_STACK_SIZE 256
-#define RAM_SIZE 65535
-#define STACK_OFFSET 4096 //7FFFF?
-#define ROM_START 0x8000
+
+#define RAM_SIZE     65535
+/*where the stack starts in RAM*/
+#define STACK_OFFSET 4096
+/*prg start within the memory*/
+#define ROM_START 	 0x8000
 
 /*interrupt addresses*/
 #define NMI 0xFFFA
@@ -65,32 +83,47 @@ class CPUCore {
 		/*used to determine if debugging*/
 		int is_debug;
 
-		/*holds ROM info*/
+		/*holds current ROM info*/
 		Ines rom;
 
+		/*pAPU chip*/
+		pAPU papu;
+
 		public:
-		/*constructor*/
 		CPUCore();
 		/*run current ROM*/
 		void run();
+
 		/*loads an INES rom*/
 		void load_ines(char* fname);
+
 		/*step through current opcode*/
 		void step();
+
 		/*used to load machine code to test instructions*/
 		void load_debug_code(char* fname);
+
 		/*dumps part of the zero page and registers, used for testing*/
 		void dump_core(CPUCore_dump*);
+
 		/*issues a reset IRQ*/
 		void reset();
+
+		/*used to share memory with pAPU*/
+		void get_memory(unsigned char*n){
+			n = m;
+		}
+
 		/*sets debug mode*/		
 		void set_debug(){
 			is_debug = true;
 		}
+
 		/*clears debug*/
 		void clear_debug(){
 			is_debug = false;
 		}
+
 		void clean_up();
 
 		private:
@@ -106,10 +139,15 @@ class CPUCore {
 				m[address+0x1000] = value;
 				m[address+0x1800] = value;
 			}
+			/*PPU I/O*/
 			else if(address >= 0x2000 && address <= 0x2007){
 				for(int i=0x2008;i<0x4000;i+=8){
 					m[address+i] = value;
 				}
+			}
+			/*pAPU I/O*/
+			else if(address >= 0x4000 && address <= 0x4015){
+				papu.handle_io(address);
 			}
 		}
 
