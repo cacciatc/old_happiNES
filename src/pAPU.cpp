@@ -9,14 +9,14 @@ pAPU::pAPU(){
 void pAPU::handle_io(short address){
 	unsigned char tmp;
 	switch(address){
+		/*channel enable register*/
 		case 0x4015:
-			/*channel enable register*/
 			tmp = cpu_memory[0x4015];
 			if(tmp&(1<<0)){
-				enable_square1();
+				sq1.is_enabled = true;
 			}
 			else{
-				disable_square1();
+				sq1.is_enabled = false;
 			}
 			if(tmp&(1<<1)){
 				enable_square2();
@@ -43,22 +43,24 @@ void pAPU::handle_io(short address){
 				disable_dmc();
 			}
 			break;
+		/*pulse 1 control*/
+		case 0x4000:
+			/*0-3	volume / envelope decay rate
+			4	envelope decay disable
+			5	length counter clock disable / envelope decay looping enable
+			6-7	duty cycle type (unused on noise channel)*/
+			break;
+		/*pulse 1 ramp control*/
+		case 0x4001:
+
+			break;
+		/*pulse 1 fine tune*/
+		case 0x4002:
+
+			break;
 		default:break;
 	}
 }
-
-void pAPU::setup_memory(unsigned char* m){
-	cpu_memory = m;
-}
-
-void pAPU::enable_square1(){
-	is_sq1_enabled = true;
-}
-
-void pAPU::disable_square1(){
-	is_sq1_enabled = false;
-}
-
 void pAPU::enable_square2(){
 	is_sq2_enabled = true;
 }
@@ -89,4 +91,8 @@ void pAPU::enable_dmc(){
 
 void pAPU::disable_dmc(){
 	is_dmc_enabled = false;
+}
+
+void pAPU::set_prg_timer(unsigned short value){
+	
 }
