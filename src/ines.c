@@ -1,15 +1,43 @@
 #line 1 "src/ines.rl"
+/*
+**  happiNES - A NES emulator written in C++.
+**  
+**  Copyright (c) 2009 Dullahan Games
+**
+**  This file is part of happiNES.
+**
+**  MIT License
+**  
+**  Permission is hereby granted, free of charge, to any person obtaining a copy
+**  of this software and associated documentation files (the "Software"), to deal
+**  in the Software without restriction, including without limitation the rights
+**  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+**  copies of the Software, and to permit persons to whom the Software is
+**  furnished to do so, subject to the following conditions:
+**  
+**  The above copyright notice and this permission notice shall be included in
+**  all copies or substantial portions of the Software.
+**  
+**  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+**  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+**  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+**  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+**  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+**  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+**  THE SOFTWARE.
+*/
+
 /*This machine currently does not support trainers!*/
 /*This machine currently only checks for the mappers 0-15.*/
 #ifndef _INES_H
 	#include "ines.h"
 #endif
 
-#line 91 "src/ines.rl"
+#line 119 "src/ines.rl"
 
 
 
-#line 13 "src/ines.c"
+#line 41 "src/ines.c"
 static const char _ines_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -66,7 +94,7 @@ static const int ines_error = 0;
 static const int ines_en_main = 1;
 static const int ines_en_main_Ines_Chr = 18;
 
-#line 94 "src/ines.rl"
+#line 122 "src/ines.rl"
 
 Ines::Ines(){
 	c_prg = 0;
@@ -91,13 +119,13 @@ void Ines::load_rom(char* fname){
   fclose(fp);
 
 	
-#line 95 "src/ines.c"
+#line 123 "src/ines.c"
 	{
 	cs = ines_start;
 	}
-#line 118 "src/ines.rl"
+#line 146 "src/ines.rl"
 	
-#line 101 "src/ines.c"
+#line 129 "src/ines.c"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -171,14 +199,14 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 11 "src/ines.rl"
+#line 39 "src/ines.rl"
 	{ 
     sz_prg = *p;
     prg = (unsigned char*)malloc(sz_prg*16*1024*sizeof(unsigned char));
   }
 	break;
 	case 1:
-#line 15 "src/ines.rl"
+#line 43 "src/ines.rl"
 	{ 
     sz_chr = *p;
 		if(sz_chr == 0)
@@ -187,7 +215,7 @@ _match:
   }
 	break;
 	case 2:
-#line 21 "src/ines.rl"
+#line 49 "src/ines.rl"
 	{ 
     vertical_mirroring   = (*p) & (1<<0) ? false : true;
     horizontal_mirroring = !vertical_mirroring;  
@@ -198,25 +226,25 @@ _match:
   }
 	break;
 	case 3:
-#line 29 "src/ines.rl"
+#line 57 "src/ines.rl"
 	{
     vs_system = (*p) & (1<<0) ? false : true;
   }
 	break;
 	case 4:
-#line 32 "src/ines.rl"
+#line 60 "src/ines.rl"
 	{ 
 		sz_ram = *p; 
 	}
 	break;
 	case 5:
-#line 35 "src/ines.rl"
+#line 63 "src/ines.rl"
 	{
     pal  = (*p) & (1<<0) ? false : true;
   }
 	break;
 	case 6:
-#line 38 "src/ines.rl"
+#line 66 "src/ines.rl"
 	{
     if(c_prg > get_prg_size()){
       {cs = 18; goto _again;}
@@ -228,7 +256,7 @@ _match:
   }
 	break;
 	case 7:
-#line 47 "src/ines.rl"
+#line 75 "src/ines.rl"
 	{ 
     if(c_chr > get_chr_size()){
 			{p++; goto _out; }
@@ -239,7 +267,7 @@ _match:
     }
   }
 	break;
-#line 243 "src/ines.c"
+#line 271 "src/ines.c"
 		}
 	}
 
@@ -251,7 +279,7 @@ _again:
 	_test_eof: {}
 	_out: {}
 	}
-#line 119 "src/ines.rl"
+#line 147 "src/ines.rl"
 	if(!p)
 		free(p);
 }

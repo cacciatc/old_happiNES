@@ -1,16 +1,68 @@
 /*
-**  This class represents the psuedo-audio processing chip found within the 2a03.
-**  author: cacciatc
+**  happiNES - A NES emulator written in C++.
 **  
+**  Copyright (c) 2009 Dullahan Games
+**
+**  This file is part of happiNES.
+**
+**  MIT License
+**  
+**  Permission is hereby granted, free of charge, to any person obtaining a copy
+**  of this software and associated documentation files (the "Software"), to deal
+**  in the Software without restriction, including without limitation the rights
+**  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+**  copies of the Software, and to permit persons to whom the Software is
+**  furnished to do so, subject to the following conditions:
+**  
+**  The above copyright notice and this permission notice shall be included in
+**  all copies or substantial portions of the Software.
+**  
+**  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+**  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+**  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+**  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+**  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+**  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+**  THE SOFTWARE.
 */
-struct Square1_Channel {
+#ifndef _STDLIB_H
+	#include <stdlib.h>
+#endif
+#include "SDL.h"
+
+#define MONO   1
+#define STEREO 2
+#define SAMPLE_RATE 44100
+#define SOUND_BUFFER_SIZE 2048
+
+/*used in the square channels*/
+const int duty_cycle_lookup_table[] = {
+	0,1,0,0,0,0,0,0,	/*12.5%*/
+	0,1,1,0,0,0,0,0,  /*25%*/
+	0,1,1,1,1,0,0,0,  /*50%*/
+	1,0,0,1,1,1,1,1   /*25% negated*/
+};
+
+/*base channel*/
+struct Channel{
 	bool is_enabled;
+};
+
+struct Square1_Channel : Channel {
 	bool is_envelope_decay_enabled;
 	bool is_length_counter_clock_enabled;
 	bool is_envelope_decay_loop_enabled;
+	bool is_sweep_enabled;
+	bool is_increasing_wavelength;
+	
+	/*2 bits, 0-4 maps to lookup table above*/
 	int duty_cycle_type;
 	int volume;
 	int envelope_decay_rate;
+	int sweep_update_rate;
+	int right_shift_amt;
+	/*11 bit timer*/
+	int prg_timer;
 };
 
 class pAPU {
@@ -24,17 +76,39 @@ class pAPU {
 
 		/*ptr to CPU memory*/
 		unsigned char *cpu_memory;
-		/*11 bit programmable timer*/
-		unsigned short prg_timer;
 
+		/*SDL and audio vars*/
+		int sample_rate;
+		int num_audio_channels;
+		int audio_format;
+		int buffer_size;
+
+		bool is_sdl_sound_open;
+		
 	public:
+		/*initializes pAPU vars*/
 		pAPU();
+
+		/*cleans up SDL etc*/
+		~pAPU();
 
 		/*called when CPU memory mapped to the pAPU is written to*/
 		void handle_io(short address);
 
-		/*gives pAPU access to CPU memory*/
+		/*gives pAPU access to CPU memory, must be called before running pAPU*/
 		void setup_memory(unsigned char* m);
+
+		/*initializes SDL sound*/
+		int initialize_sound();
+
+		/*MONO,STEREO*/
+		void set_audio_channels(int num);
+ 
+		/*resets all channels to default values*/
+		void reset();
+
+		/*called in main emu loop*/
+		void run();
 
 	private:
 		/*channel enable/disable*/
@@ -47,7 +121,9 @@ class pAPU {
 		void enable_dmc();
 		void disable_dmc();
 
-		/*timer methods*/
-		void set_prg_timer(unsigned short value);
+		/*sound functions*/
+		void envelope(Channel& ch);
+		void sweep(Channel& ch);
+		void update_length_counter(Channel& ch);
 
 };

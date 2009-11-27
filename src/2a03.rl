@@ -1,3 +1,31 @@
+/*
+**  happiNES - A NES emulator written in C++.
+**  
+**  Copyright (c) 2009 Dullahan Games
+**
+**  This file is part of happiNES.
+**
+**  MIT License
+**  
+**  Permission is hereby granted, free of charge, to any person obtaining a copy
+**  of this software and associated documentation files (the "Software"), to deal
+**  in the Software without restriction, including without limitation the rights
+**  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+**  copies of the Software, and to permit persons to whom the Software is
+**  furnished to do so, subject to the following conditions:
+**  
+**  The above copyright notice and this permission notice shall be included in
+**  all copies or substantial portions of the Software.
+**  
+**  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+**  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+**  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+**  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+**  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+**  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+**  THE SOFTWARE.
+*/
+
 /*TODO
 ** -not counting cycles correctly for looking up across pages.
 ** -until memory mappers are implemented the load_nes function simply duplicates ROM into 0x8000 and 0xC000
@@ -1614,6 +1642,8 @@
 		}
 
 		//emulate sound
+		if(is_sound_enabled)
+			papu.run();
 		//emulate ppu
   }
  
@@ -1751,6 +1781,10 @@ CPUCore::CPUCore(){
 
 	/*create pAPU*/
 	papu = pAPU();
+	papu.setup_memory(m);
+	papu.initialize_sound();
+
+	is_sound_enabled = true;
 
 	%%write init;
 }
@@ -1795,9 +1829,11 @@ void CPUCore::step(){
 				}
 				break;
 			case 'p':
+				/*print the next instruction*/
 				printf("[0x%X] %2X\n",p-m,*p);
 				break;
 			case 'm':
+				/*jump to memory page n*/
 				scanf(" %i",&page_number);
 				if(page_number > 255)
 					break;
@@ -1812,6 +1848,7 @@ void CPUCore::step(){
 				system("clear");
 				break;
 			case 'j':
+				/*jumps to the memory page that contains the supplied address*/
 				scanf(" %x",&page_number);
 				if(page_number > 0xFFFF)
 					break;
@@ -1829,6 +1866,7 @@ void CPUCore::step(){
 				clean_up();
 				exit(0);
 			case 'o':
+				/*print the previous instruction*/
 				printf("[0x%X] %2X\n",p-arg_count-m,*(p-arg_count));
 				break;
 			case 'h':
@@ -1843,8 +1881,7 @@ void CPUCore::step(){
 				printf("m - print prg mem pages\n");
 				printf("j - print prg mem page containing supplied addr\n");
 				printf("q - quit debug\n");
-			default :
-				break;
+			default : break;
 		}
 	}
 }
@@ -1883,6 +1920,10 @@ void CPUCore::load_ines(char* fname){
 	rom.get_prg(&m[0xC000]);
 	p = &m[ROM_START];
 	pe = p+rom.get_prg_size();
+}
+
+void enable_sound(bool b){
+	is_sound_enabled = b;
 }
 
 void reset(){
