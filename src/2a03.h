@@ -114,6 +114,7 @@ class CPUCore {
 
 		public:
 		CPUCore();
+		~CPUCore();
 		/*run current ROM*/
 		void run();
 

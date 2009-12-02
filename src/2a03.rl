@@ -1771,6 +1771,10 @@
 
 %%write data;
 
+CPUCore::~CPUCore(){
+	clean_up();
+}
+
 CPUCore::CPUCore(){
 	cycles = interrupt_period = 100;
 	status    = 0;
@@ -1922,7 +1926,7 @@ void CPUCore::load_ines(char* fname){
 	pe = p+rom.get_prg_size();
 }
 
-void enable_sound(bool b){
+void CPUCore::enable_sound(bool b){
 	is_sound_enabled = b;
 }
 

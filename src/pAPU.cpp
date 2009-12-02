@@ -41,14 +41,12 @@ pAPU::pAPU(){
 }
 
 pAPU::~pAPU(){
-	if(is_sdl_sound_open){
-		SDL_PauseAudio(true);
-		SDL_CloseAudio();
-		SDL_Quit();
-	}
+	SDL_PauseAudio(true);
+	SDL_CloseAudio();
+	SDL_Quit();
 }
 
-int pAPU::initialize_sound(){
+bool pAPU::initialize_sound(){
 	SDL_AudioSpec spec;
 	
 	/*setup audio spec*/
@@ -60,17 +58,15 @@ int pAPU::initialize_sound(){
 	spec.size = 0;
 	spec.silence = 0;
 
-	if(SDL_Init(SDL_INIT_AUDIO) < 0){
-		printf("%s\n",SDL_GetError());
-	}
-
 	if(SDL_OpenAudio(&spec,NULL) < 0 ){
 		printf("%s\n",SDL_GetError());
 	}
-
-	SDL_PauseAudio(false);
-
-	return(0);
+	else{
+		is_sdl_sound_open = true;
+		SDL_PauseAudio(false);
+		return true;
+	}
+	return(false);
 }
 
 void pAPU::setup_memory(unsigned char* m){

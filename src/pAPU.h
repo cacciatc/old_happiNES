@@ -28,7 +28,10 @@
 #ifndef _STDLIB_H
 	#include <stdlib.h>
 #endif
-#include "SDL.h"
+#ifndef _SDL_H
+	#include "SDL.h"
+#endif
+#include "SDL_mixer.h"
 
 #define MONO   1
 #define STEREO 2
@@ -99,7 +102,7 @@ class pAPU {
 		void setup_memory(unsigned char* m);
 
 		/*initializes SDL sound*/
-		int initialize_sound();
+		bool initialize_sound();
 
 		/*MONO,STEREO*/
 		void set_audio_channels(int num);
