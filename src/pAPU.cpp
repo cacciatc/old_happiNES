@@ -37,13 +37,11 @@ pAPU::pAPU(){
 	/*16 bit*/
 	audio_format = AUDIO_S16SYS;
 	buffer_size = SOUND_BUFFER_SIZE;
-	is_sdl_sound_open = false;
 }
 
 pAPU::~pAPU(){
 	SDL_PauseAudio(true);
 	SDL_CloseAudio();
-	SDL_Quit();
 }
 
 bool pAPU::initialize_sound(){
@@ -58,15 +56,8 @@ bool pAPU::initialize_sound(){
 	spec.size = 0;
 	spec.silence = 0;
 
-	if(SDL_OpenAudio(&spec,NULL) < 0 ){
-		printf("%s\n",SDL_GetError());
-	}
-	else{
-		is_sdl_sound_open = true;
-		SDL_PauseAudio(false);
-		return true;
-	}
-	return(false);
+	SDL_PauseAudio(false);
+	return true;
 }
 
 void pAPU::setup_memory(unsigned char* m){

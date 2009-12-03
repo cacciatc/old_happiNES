@@ -32,12 +32,18 @@
 #ifndef _2a03_H
 		#include "2a03.h"
 #endif
-#include "SDL.h"
+#include <SDL.h>
+
+/*the maximum number of remembered ROM sessions available*/
+#define MAX_PRELOADED_ROMS 5
 
 class Happines{
 	private:
+		/*SDL vars*/
 		SDL_Surface *screen;	
   	SDL_Event event;
+		/*emulation vars*/
+		CPUCore cores[MAX_PRELOADED_ROMS];
 
 	public:
 		Happines();
@@ -48,4 +54,6 @@ class Happines{
 	private:
 		/*handles keyboard input*/
 		void handle_key(SDL_KeyboardEvent key);
+		/*opens a config file and attempts to load num most recent ROMS*/
+		void load_recent_roms(int num);
 };

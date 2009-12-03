@@ -30,6 +30,15 @@
 	#include "happiNES.h"
 #endif
 
+
+/*main happiNES loop*/
+int main(void){
+	Happines hap;
+	hap = Happines();
+	return hap.run();
+}
+
+/*happiNES class methods*/
 Happines::Happines(){
 	
 	/*initialize SDL*/
@@ -37,6 +46,15 @@ Happines::Happines(){
   screen = SDL_SetVideoMode(320, 240, 0, SDL_RESIZABLE);
 
 	SDL_WM_SetCaption("happiNES","happiNES");
+
+	/*load some recent roms*/
+	load_recent_roms(MAX_PRELOADED_ROMS);
+
+	/*startup GUI*/
+}
+
+void Happines::load_recent_roms(int num){
+
 }
 
 Happines::~Happines(){
@@ -59,13 +77,6 @@ int Happines::run(){
 	return 0;
 }
 
-
-int main(void){
-	Happines hap;
-	hap = Happines();
-	return hap.run();
-}
-
 void Happines::handle_key(SDL_KeyboardEvent key) {
   switch(key.keysym.sym) {
   	case SDLK_p:
@@ -75,10 +86,4 @@ void Happines::handle_key(SDL_KeyboardEvent key) {
 		default:break;
  	}
 }
-
-	/*check recent history for played ROMS*/
-	/*if played roms then create CPUCores for n most recent ROMS*/
-		/*load ROMS*/
-	/*else create CPUCore*/
-	/*startup GUI*/
 

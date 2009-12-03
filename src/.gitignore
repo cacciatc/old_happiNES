@@ -8,3 +8,4 @@ ines.c~
 ines.c
 ines.h~
 ines_test.cpp~
+*.o

@@ -85,8 +85,6 @@ class pAPU {
 		int num_audio_channels;
 		int audio_format;
 		int buffer_size;
-
-		bool is_sdl_sound_open;
 		
 	public:
 		/*initializes pAPU vars*/
