@@ -30,9 +30,7 @@
 ** -not counting cycles correctly for looking up across pages.
 ** -until memory mappers are implemented the load_nes function simply duplicates ROM into 0x8000 and 0xC000
 */
-#ifndef _2A03_H
-	#include "2a03.h"
-#endif
+#include "2a03.h"
 		
 %%{
   machine cpu;
@@ -87,13 +85,15 @@
     }
   }
   action brk {
-    /*push program counter and status*/
-    push(p-m-ROM_START+1);
-    push(status);
-    /*load interrupt vector*/
-    schedule_jump(IRQ-ROM_START);
-    set_break_flag();
- 		set_interrupt_disable_flag();
+		if(!get_interrupt_disable_flag()){
+		  /*push program counter and status*/
+		  push(p-m-ROM_START+1);
+		  push(status);
+		  /*load interrupt vector*/
+		  schedule_jump(IRQ-ROM_START);
+		  set_break_flag();
+	 		set_interrupt_disable_flag();
+		}
 		cycles -= 7;
   }
   action return_from_interrupt {
@@ -1619,6 +1619,17 @@
   
   #special actions
   action cyclic_tasks {
+		/*
+		**  Main Emulatation Loop
+		**  	-This is where interrupts are handled, pAPU updates its frame, and the PPU does whatever it does.
+		**  	-Also note that this is a ragel event, and not a regular c function.
+		*/
+	
+		/*abort if no more input*/    
+		if(p >= pe){
+      fbreak;
+		}
+		/*if in debug mode, step through code*/
 		if(is_debug){
 			step();
 			printf("[0x%.4X] ",(unsigned int)(p-arg_count-m));
@@ -1628,23 +1639,44 @@
   		printf("\n");
 		}
 
+		/*probably time for an interrupt*/
     if(cycles <= 0){
+			/*any requested?, note the BRK cmd is handled elsewhere, might be advantageous to have it handled here too though*/
+			if(interrupt_requested){			
+				/*push program counter and status*/
+    		push(p-m-ROM_START+1);
+    		push(status);
+ 				set_interrupt_disable_flag();
+				/*TODO: add memory mapper here!*/
+				switch(interrupt_type){
+					case NMI:
+						 /*load interrupt vector*/
+    				schedule_jump(NMI-ROM_START);
+						break;
+					case IRQ:
+ 						/*load interrupt vector*/
+    				schedule_jump(IRQ-ROM_START);
+						break;
+					case RES:
+						 /*load interrupt vector*/
+    				schedule_jump(RES-ROM_START);
+						break;
+				}
+			}
       cycles += interrupt_period;
     }
-    if(p >= pe){
-      fbreak;
-		}
+
+		//emulate sound
+		papu.update_frame(cycles);
+		//emulate ppu
+
+		/*note the jump code is here so that debugging dumps are easier to read.*/
 		/*perform any scheduled jumps*/
 		if(is_jump_planned){
 			is_jump_planned = 0;
 			p = jump_address;
 			fexec p;
 		}
-
-		//emulate sound
-		if(is_sound_enabled)
-			papu.run();
-		//emulate ppu
   }
  
   #system functions
@@ -1779,16 +1811,16 @@ CPUCore::CPUCore(){
 	cycles = interrupt_period = 100;
 	status    = 0;
 	arg_count = 0;
-	is_debug  = 0;	
+	is_debug  = false;
 	pstack    = MY_STACK_SIZE-1;
 	is_jump_planned = 0;
+
+	interrupt_requested = false;
 
 	/*create pAPU*/
 	papu = pAPU();
 	papu.setup_memory(m);
 	papu.initialize_sound();
-
-	is_sound_enabled = true;
 
 	%%write init;
 }
@@ -1920,20 +1952,24 @@ void CPUCore::load_debug_code(char* fname){
 void CPUCore::load_ines(char* fname){
 	rom = Ines();
 	rom.load_rom(fname);
+	/*TODO: add memory mapper here!*/
 	rom.get_prg(&m[ROM_START]);
 	rom.get_prg(&m[0xC000]);
 	p = &m[ROM_START];
 	pe = p+rom.get_prg_size();
 }
 
-void CPUCore::enable_sound(bool b){
-	is_sound_enabled = b;
-}
-
-void reset(){
-
+void CPUCore::reset(){
+	papu.reset();
 }
 
 void CPUCore::clean_up(){
 	rom.clean_up();
+}
+
+void CPUCore::request_interrupt(int type){
+		if(interrupt_requested && type != IRQ){
+			interrupt_requested = true;
+			interrupt_type = type;
+		}
 }

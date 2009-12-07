@@ -25,23 +25,16 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-#ifndef _STDIO_H
-	#include <stdio.h>
-#endif
-#ifndef _STDLIB_H
-	#include <stdlib.h>
-#endif
-#ifndef _STRING_H
-	#include <string.h>
-#endif
-#ifndef _INES_H
-	#include "ines.h"
-#endif
-#ifndef _PAPU_H
-	#include "pAPU.h"
-#endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ines.h"
+#include "pAPU.h"
+
+/*used in calculating cycles*/
 #define PAGE_SIZE     256
+/*used for stack wrap-around*/
 #define MY_STACK_SIZE 256
 
 #define RAM_SIZE     65535
@@ -55,6 +48,14 @@
 #define RES 0xFFFC
 #define IRQ 0xFFFE
 
+/*motherboard clocks (MHz)*/
+#define PAL_CLOCK  26.601171
+#define NTSC_CLOCK 21.4772
+/*dividers to produce 1.79 MHz to external interface*/
+#define PAL_DIVIDER  16
+#define NTSC_DIVIDER 12
+
+/*debugging structure, provided upon request from the core*/
 struct CPUCore_dump{
 	/*memory*/
 	unsigned char m[RAM_SIZE];
@@ -68,6 +69,7 @@ struct CPUCore_dump{
 	unsigned char status;
 };
 
+/*the 2a03 board*/
 class CPUCore {
 	private:
 		/*memory*/
@@ -97,6 +99,11 @@ class CPUCore {
 		/*used for timing*/
 		int interrupt_period;
 
+		/*info on interrupts*/
+		/*NMI, IRG, and RES*/
+		int interrupt_type;
+		bool interrupt_requested;
+
 		/*used to perform jumps*/
 		int is_jump_planned;
 		unsigned char* jump_address;
@@ -109,8 +116,6 @@ class CPUCore {
 
 		/*pAPU chip*/
 		pAPU papu;
-
-		bool is_sound_enabled;
 
 		public:
 		CPUCore();
@@ -133,8 +138,8 @@ class CPUCore {
 		/*issues a reset IRQ*/
 		void reset();
 
-		/*used to turn sound from pAPU on/off*/
-		void enable_sound(bool b);
+		/*used to request an interrupt*/
+		void request_interrupt(int type);
 
 		/*used to share memory with pAPU*/
 		void get_memory(unsigned char*n){
@@ -154,9 +159,13 @@ class CPUCore {
 		void clean_up();
 
 		private:
+
 		/*memory functions*/
 		int read_memory(short address){
-  		return m[address];
+			if(address == 0x4015)
+				return papu.handle_read(address);
+			else
+  			return m[address];
 		}
 		void write_memory(short address,unsigned char value){
     	m[address] = value;
@@ -174,7 +183,7 @@ class CPUCore {
 			}
 			/*pAPU I/O*/
 			else if(address >= 0x4000 && address <= 0x4015){
-				papu.handle_io(address);
+				papu.handle_write(address);
 			}
 		}
 

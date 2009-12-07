@@ -25,16 +25,16 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-
-#ifndef _HAPPINES_H
-	#include "happiNES.h"
-#endif
-
+#include "happiNES.h"
 
 /*main happiNES loop*/
-int main(void){
+int main(int argc,char** argv){
 	Happines hap;
 	hap = Happines();
+
+	if(argc >= 2){
+		hap.load_rom(*(argv+1));
+	}
 	return hap.run();
 }
 
@@ -47,6 +47,8 @@ Happines::Happines(){
 
 	SDL_WM_SetCaption("happiNES","happiNES");
 
+	/*create a default machine*/
+	cores[0] = CPUCore();
 	/*load some recent roms*/
 	load_recent_roms(MAX_PRELOADED_ROMS);
 
@@ -57,21 +59,26 @@ void Happines::load_recent_roms(int num){
 
 }
 
+void Happines::load_rom(char* fname){
+	cores[0].load_ines(fname);
+}
+
 Happines::~Happines(){
 
 }
 
 int Happines::run(){
 	while(true){
+		/*check SDL events*/
 		while(SDL_PollEvent(&event)) {
-		   switch(event.type) {
-		    case SDL_QUIT:
+			 switch(event.type) {
+			  case SDL_QUIT:
 					return(0);
-		   	case SDL_KEYDOWN:
-		   	case SDL_KEYUP:
+			 	case SDL_KEYDOWN:
+			 	case SDL_KEYUP:
 					handle_key(event.key);
 					break;
-		   }
+			 }
 		}
 	}
 	return 0;

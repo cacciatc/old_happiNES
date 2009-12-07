@@ -25,10 +25,7 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-
-#ifndef _PAPU_H
-	#include "pAPU.h"
-#endif
+#include "pAPU.h"
 
 pAPU::pAPU(){
 	sample_rate = SAMPLE_RATE;
@@ -37,6 +34,9 @@ pAPU::pAPU(){
 	/*16 bit*/
 	audio_format = AUDIO_S16SYS;
 	buffer_size = SOUND_BUFFER_SIZE;
+
+	/*pAPU hardware setup*/
+	reset();
 }
 
 pAPU::~pAPU(){
@@ -64,7 +64,7 @@ void pAPU::setup_memory(unsigned char* m){
 	cpu_memory = m;
 }
 
-void pAPU::handle_io(short address){
+void pAPU::handle_write(short address){
 	unsigned char tmp;
 
 	/*the memory has not been setup!*/	
@@ -106,7 +106,7 @@ void pAPU::handle_io(short address){
 		/*pulse 1 control*/
 		case 0x4000:
 			sq1.is_envelope_decay_enabled       = (tmp&(1<<4)) ? true : false;
-			sq1.is_length_counter_clock_enabled = (tmp&(1<<5)) ? true : false;
+			sq1.is_length_counter_clock_enabled = (tmp&(1<<5)) ? false : true;
 			sq1.is_envelope_decay_loop_enabled  = (tmp&(1<<5)) ? true : false;
 			sq1.duty_cycle_type     = (tmp&0xC0);
 			sq1.envelope_decay_rate = (tmp&0x07);
@@ -131,9 +131,40 @@ void pAPU::handle_io(short address){
 			sq1.prg_timer |= (tmp&07);
 			/*length counter? what is it*/
 			break;
+		case 0x4017:
+			/*IRQ's enabled?*/
+			frame_irq_enabled = (tmp&(1<<6)) ? false : true;
+			/*divider and frame IRQ rate*/
+			if(tmp&(1<<7)){
+				frame_divider  = 5;
+				frame_counter  = 0;
+				frame_irq_freq = 48;
+				/*clock linear and envelope decay*/
+			}
+			else{
+				frame_divider  = 4;
+				frame_counter  = 4;
+				frame_irq_freq = 60;
+			}
+			break;
 		default:break;
 	}
 }
+
+int pAPU::handle_read(short address){
+	unsigned char ret = 0x00;
+	switch(address){
+		case 0x4017:
+			/*length counter status reg*/
+			/*TODO: the remaining bits need to be filled in!*/
+			ret |= ((sq1.length_counter == 0 ? 0 : 1)<<0);
+			ret |= ((frame_irq_enabled == true ? 1 : 0)<<6);
+			break;
+		default:break;
+	}
+	return ret;
+}
+
 void pAPU::enable_square2(){
 	is_sq2_enabled = true;
 }
@@ -166,30 +197,13 @@ void pAPU::disable_dmc(){
 	is_dmc_enabled = false;
 }
 
-void pAPU::run(){
-	/*update square 1*/
-	if(sq1.is_enabled){
-		/*env*/
-		if(sq1.is_envelope_decay_enabled)
-			envelope(sq1);
-		/*sweep*/
-		if(sq1.is_sweep_enabled)
-			sweep(sq1);
-		/*length counter*/
-		if(sq1.is_length_counter_clock_enabled)
-			update_length_counter(sq1);
-	}
-
-	/*update square 2*/
-	/*update triangle*/
-	/*update noise*/
-	/*update dmc*/
-	
-	/*mix*/
-	/*output*/
-}
-
 void pAPU::reset(){
+	/*pAPU specific*/
+	frame_counter  = 4;
+	frame_divider  = 4;
+	frame_irq_freq = 60;
+	frame_irq_enabled = true;
+
 	/*reset square 1*/
 	sq1.is_enabled = false;
 	sq1.is_envelope_decay_enabled = false;
@@ -203,6 +217,7 @@ void pAPU::reset(){
 	sq1.right_shift_amt = 0;
 	sq1.sweep_update_rate = 0;
 	sq1.prg_timer = 0;
+	sq1.length_counter = 0;
 
 	/*reset square 2*/
 	/*reset triangle*/
@@ -214,14 +229,33 @@ void pAPU::set_audio_channels(int num){
 	num_audio_channels = num;
 }
 
-void pAPU::envelope(Channel& ch){
-
-}
-
-void pAPU::sweep(Channel& ch){
-
-}
+void pAPU::update_frame(int cycles){
+	/*Although, the sound specs say if $4017.7 == 0 then the series should be 4,0,1,2,3,0,1,2,3...*/
+	/*most emulators seems to only worry about the $4017.7 == 1 case*/
+	frame_counter = (frame_counter+1) % 4;
+	switch(frame_counter){
+		case 0:
+			/*clock linear and envelope decay*/
+			break;
+		case 1:
+			/*clock linear and envelope decay*/
+			/*update freq sweep and length counters*/
+			break;
+		case 2:
+			/*clock linear and envelope decay*/
+			break;
+		case 3:
+			/*clock linear and envelope decay*/
+			/*update freq sweep and length counters*/
+			break;
+		default:break;
+	}
+	/*update square 1*/
+	/*update square 2*/
+	/*update triangle*/
+	/*update noise*/
+	/*update dmc*/
 	
-void pAPU::update_length_counter(Channel& ch){
-
+	/*mix*/
+	/*output*/
 }

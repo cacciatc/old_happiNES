@@ -25,12 +25,9 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-#ifndef _STDLIB_H
-	#include <stdlib.h>
-#endif
-#ifndef _SDL_H
-	#include "SDL.h"
-#endif
+
+#include <stdlib.h>
+#include "SDL.h"
 #include "SDL_mixer.h"
 
 #define MONO   1
@@ -51,6 +48,7 @@ struct Channel{
 	bool is_enabled;
 };
 
+/*maybe someday put channels in class, or maybe not...*/
 struct Square1_Channel : Channel {
 	bool is_envelope_decay_enabled;
 	bool is_length_counter_clock_enabled;
@@ -60,12 +58,38 @@ struct Square1_Channel : Channel {
 	
 	/*2 bits, 0-4 maps to lookup table above*/
 	int duty_cycle_type;
+	/*volume of this channel*/
 	int volume;
 	int envelope_decay_rate;
 	int sweep_update_rate;
 	int right_shift_amt;
+	/*a timer used to silence a channel*/
+	int length_counter;
 	/*11 bit timer*/
 	int prg_timer;
+
+	/*SDL sound specific*/
+	unsigned char* raw_sample;
+	Mix_Chunk* sample;
+
+	void update_length_counter(){
+		/*if this counter is enabled and greater than zero*/
+		if(is_length_counter_clock_enabled && length_counter > 0){
+			length_counter--;
+			/*now update the sample since this channel is silenced!*/
+			if(length_counter == 0)
+				update_sample();
+		}
+	}
+	void update_sweep(){
+
+	}
+	void update_envelope_decay(){
+
+	}
+	void update_sample(){
+
+	}
 };
 
 class pAPU {
@@ -76,6 +100,12 @@ class pAPU {
 		bool is_tri_enabled;
 		bool is_noise_enabled;
 		bool is_dmc_enabled;
+
+		/*generates low freq signals reqd to clock counters, and generates IRQs*/
+		int frame_counter;
+		int frame_divider;
+		int frame_irq_freq;
+		bool frame_irq_enabled;
 
 		/*ptr to CPU memory*/
 		unsigned char *cpu_memory;
@@ -94,7 +124,10 @@ class pAPU {
 		~pAPU();
 
 		/*called when CPU memory mapped to the pAPU is written to*/
-		void handle_io(short address);
+		void handle_write(short address);
+
+		/*called when CPU memory mapped to pAPU is read from*/
+		int handle_read(short address);
 
 		/*gives pAPU access to CPU memory, must be called before running pAPU*/
 		void setup_memory(unsigned char* m);
@@ -105,13 +138,14 @@ class pAPU {
 		/*MONO,STEREO*/
 		void set_audio_channels(int num);
  
-		/*resets all channels to default values*/
+		/*resets all channels to default values.  Note, this reset must be called with CPUCore.reset()*/
 		void reset();
 
-		/*called in main emu loop*/
-		void run();
+		/*called in CPU's main loop*/
+		void update_frame(int cycles);
 
 	private:
+
 		/*channel enable/disable*/
 		void enable_square2();
 		void disable_square2();
@@ -121,10 +155,5 @@ class pAPU {
 		void disable_noise();
 		void enable_dmc();
 		void disable_dmc();
-
-		/*sound functions*/
-		void envelope(Channel& ch);
-		void sweep(Channel& ch);
-		void update_length_counter(Channel& ch);
 
 };

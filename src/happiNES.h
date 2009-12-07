@@ -25,13 +25,8 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-
-#ifndef _STDIO_H
-	#include <stdio.h>
-#endif
-#ifndef _2a03_H
-		#include "2a03.h"
-#endif
+#include <stdio.h>
+#include "2a03.h"
 #include <SDL.h>
 
 /*the maximum number of remembered ROM sessions available*/
@@ -48,6 +43,8 @@ class Happines{
 	public:
 		Happines();
 		~Happines();
+		/*loads a rom*/
+		void load_rom(char* fname);
 		/*starts the main processing loop*/
 		int run();
 

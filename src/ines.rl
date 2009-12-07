@@ -144,11 +144,11 @@ void Ines::load_rom(char* fname){
 
 	%%write init;
 	%%write exec;
-	if(!p)
+	if(p)
 		free(p);
 }
 
 void Ines::clean_up(){
-	if(!p)
+	if(p)
 		free(p);
 }
