@@ -159,7 +159,6 @@ class CPUCore {
 		void clean_up();
 
 		private:
-
 		/*memory functions*/
 		int read_memory(short address){
 			if(address == 0x4015)

@@ -149,6 +149,5 @@ void Ines::load_rom(char* fname){
 }
 
 void Ines::clean_up(){
-	if(p)
-		free(p);
+	
 }

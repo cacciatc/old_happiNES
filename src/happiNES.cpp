@@ -34,8 +34,14 @@ int main(int argc,char** argv){
 
 	if(argc >= 2){
 		hap.load_rom(*(argv+1));
+		hap.launch_nes(DEFAULT_CORE_INDEX);
 	}
 	return hap.run();
+}
+
+int run_nes_thread(void*data){
+	cores[core_index].run();
+	return 0;
 }
 
 /*happiNES class methods*/
@@ -48,11 +54,22 @@ Happines::Happines(){
 	SDL_WM_SetCaption("happiNES","happiNES");
 
 	/*create a default machine*/
-	cores[0] = CPUCore();
+	core_index = DEFAULT_CORE_INDEX;
+	cores[core_index] = CPUCore();
+	
 	/*load some recent roms*/
 	load_recent_roms(MAX_PRELOADED_ROMS);
 
 	/*startup GUI*/
+}
+
+void Happines::launch_nes(int index){
+	if(index >= DEFAULT_CORE_INDEX and index <= MAX_PRELOADED_ROMS){
+			/*core_index is used by run thread*/
+			core_index = index;
+			if(!thread_cores[index])
+				thread_cores[index] = SDL_CreateThread(run_nes_thread,NULL);
+	}
 }
 
 void Happines::load_recent_roms(int num){
@@ -60,7 +77,7 @@ void Happines::load_recent_roms(int num){
 }
 
 void Happines::load_rom(char* fname){
-	cores[0].load_ines(fname);
+	cores[core_index].load_ines(fname);
 }
 
 Happines::~Happines(){
