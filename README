@@ -34,13 +34,11 @@ README
 	-This file.
 LICENSE
 	-Licensing file.
-make.rb
-	-Ruby script that compiles CPU core and then runs tests.
 
 -Dependencies-
 	-ragel 
 	-SDL
-	-ruby
+	-ruby (for running tests)
 	-g++
 
 -Resources-
