@@ -27,13 +27,15 @@
 
 -Directory Contents-
 /src
-	-Contains Ragel source files
+	-Contains Ragel and C/C++ source files
 /tests
 	-Contains test files broken into suites based on instruction type as well as a few general categories.
 README
 	-This file.
 LICENSE
 	-Licensing file.
+NOTES
+	-Contains notes on the tools used as well as happiNES' design.
 
 -Dependencies-
 	-ragel 
