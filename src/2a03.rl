@@ -1624,7 +1624,6 @@
 		**  	-This is where interrupts are handled, pAPU updates its frame, and the PPU does whatever it does.
 		**  	-Also note that this is a ragel event, and not a regular c function.
 		*/
-	
 		/*abort if no more input*/    
 		if(p >= pe){
       fbreak;

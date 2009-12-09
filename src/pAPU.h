@@ -134,6 +134,7 @@ class pAPU {
 
 		/*initializes SDL sound*/
 		bool initialize_sound();
+		void close_sound();
 
 		/*MONO,STEREO*/
 		void set_audio_channels(int num);

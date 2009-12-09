@@ -40,6 +40,10 @@ pAPU::pAPU(){
 }
 
 pAPU::~pAPU(){
+
+}
+
+void pAPU::close_sound(){
 	SDL_PauseAudio(true);
 	SDL_CloseAudio();
 }

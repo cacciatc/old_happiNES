@@ -32,7 +32,8 @@ int main(int argc,char** argv){
 	Happines hap;
 	hap = Happines();
 
-	hap.load_rom("Legendary Wings (U).nes");
+	//hap.load_rom("/home/cacciatc/Desktop/happiNES/Legendary Wings (U).nes");
+	hap.load_rom("/home/cacciatc/Desktop/happiNES/a_demo.nes");
 	hap.launch_nes(DEFAULT_CORE_INDEX);
 	return hap.run();
 }

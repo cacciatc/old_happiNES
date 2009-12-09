@@ -38,22 +38,27 @@
   #actions
   action get_prg_size { 
     sz_prg = *p;
-    prg = (unsigned char*)malloc(sz_prg*16*1024*sizeof(unsigned char));
+		prg = new unsigned char[sz_prg*16*1024];
+    //prg = (unsigned char*)malloc(sz_prg*16*1024*sizeof(unsigned char));
   }
   action get_chr_size { 
     sz_chr = *p;
 		if(sz_chr == 0)
 			sz_chr = 1;
-    chr = (unsigned char*)malloc(sz_chr*8*1024*sizeof(unsigned char));  
+    //chr = (unsigned char*)malloc(sz_chr*8*1024*sizeof(unsigned char));  
+		chr = new unsigned char[sz_chr*8*1024];
   }
-  action get_options  { 
+  action get_ctrl_1  { 
     vertical_mirroring   = (*p) & (1<<0) ? false : true;
     horizontal_mirroring = !vertical_mirroring;  
     battery_ram          = (*p) & (1<<1) ? false : true;
     trainer              = (*p) & (1<<2) ? false : true;
     four_chr             = (*p) & (1<<3) ? false : true;
-    map_type             = ((*p)&(1<<4))*1 + ((*p)&(1<<5))*2 + ((*p)&(1<<6))*4 + ((*p)&(1<<7))*8;
+    map_type             = (*p)>>4;
   }
+	action get_ctrl_2{
+		map_type += (*p)>>4;
+	}
   action get_vs_system{
     vs_system = (*p) & (1<<0) ? false : true;
   }
@@ -87,7 +92,8 @@
   header_preamble = "NES" . 0x1A;
   prg_size        = extend @get_prg_size;
   chr_size        = extend @get_chr_size;
-  opt_flags       = extend @get_options;
+  ctrl_1          = extend @get_ctrl_1;
+	ctrl_2          = extend @get_ctrl_2;
   vs_syste        = extend @get_vs_system;
   ram_size        = extend @get_ram_size;
   disp_info       = 0..1  @get_disp_info;
@@ -103,7 +109,7 @@
     ),
     
     Header: (
-      prg_size . chr_size . opt_flags .vs_syste . ram_size . disp_info . header_end -> Prg
+      prg_size . chr_size . ctrl_1 . ctrl_2 .vs_syste . ram_size . disp_info . header_end -> Prg
     ),
     
     Prg: (
@@ -156,6 +162,8 @@ Ines::~Ines(){
 		//free(Ines::p);
 	//if(prg)
 		//free(prg);
+	//if(prg)
+		//delete[] prg;
 	//if(chr)
 		//free(chr);
 }
