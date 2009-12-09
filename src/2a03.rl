@@ -1971,7 +1971,7 @@ void CPUCore::reset(){
 }
 
 void CPUCore::clean_up(){
-	rom.clean_up();
+
 }
 
 void CPUCore::request_interrupt(int type){

@@ -32,7 +32,7 @@ int main(int argc,char** argv){
 	Happines hap;
 	hap = Happines();
 
-	hap.load_rom("a_demo.nes");
+	hap.load_rom("Legendary Wings (U).nes");
 	hap.launch_nes(DEFAULT_CORE_INDEX);
 	return hap.run();
 }
@@ -103,7 +103,7 @@ int Happines::run(){
 
 void Happines::handle_key(SDL_KeyboardEvent key) {
   switch(key.keysym.sym) {
-  	case SDLK_p:
+  	case SDLK_ESCAPE:
     	if(key.type == SDL_KEYDOWN)
 				SDL_Quit();
     	break;

@@ -78,21 +78,19 @@ class Ines {
 
 	public:
 		Ines();
+		~Ines();
 
 		/*loads a nes file*/
 		void load_rom(char* fname);
 
-		/*release memory, etc*/
-		void clean_up();
-
 		/*returns a pointer to prg*/
 		void get_prg(unsigned char* m){
-			memcpy(m,prg,get_prg_size());
+			memcpy(m,prg,get_prg_size()*sizeof(unsigned char));
 		}
 
 		/*returns a pointer to chr*/
 		void get_chr(unsigned char* m){
-			m = chr;
+			memcpy(m,chr,get_chr_size()*sizeof(unsigned char));
 		}
 
 		/*return the prg size in kb*/

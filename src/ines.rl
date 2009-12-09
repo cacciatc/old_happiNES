@@ -64,7 +64,7 @@
     pal  = (*p) & (1<<0) ? false : true;
   }
   action get_next_prg_byte{
-    if(c_prg > get_prg_size()){
+    if(c_prg >= get_prg_size()){
       fgoto Chr;
 		}
     else{
@@ -73,7 +73,7 @@
 		}
   }
   action get_next_chr_byte{ 
-    if(c_chr > get_chr_size()){
+    if(c_chr >= get_chr_size()){
 			fbreak;
 		} 
     else{
@@ -123,6 +123,10 @@
 Ines::Ines(){
 	c_prg = 0;
 	c_chr = 0;
+	prg = NULL;
+	chr = NULL;
+	p  = NULL;
+	pe = NULL;
 }
 
 void Ines::load_rom(char* fname){
@@ -143,10 +147,15 @@ void Ines::load_rom(char* fname){
   fclose(fp);
 
 	%%write init;
-	%%write exec noend;
+	%%write exec;
 }
 
-void Ines::clean_up(){
-	//if(p)
-		//free(p);
+Ines::~Ines(){
+	/*TODO:  Why does freeing these pointers result in seg faults!*/
+	//if(Ines::p)
+		//free(Ines::p);
+	//if(prg)
+		//free(prg);
+	//if(chr)
+		//free(chr);
 }
