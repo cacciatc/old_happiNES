@@ -135,7 +135,7 @@ void Ines::load_rom(char* fname){
 	}
 
 	fseek(fp,0,SEEK_END);
-  fsize = ftell(fp);
+  fsize = ftell(fp)+1;
 	fseek(fp,0,SEEK_SET);
 	p = (unsigned char*)malloc(fsize*sizeof(unsigned char));
   fread(p,sizeof(unsigned char),fsize,fp);
@@ -143,11 +143,10 @@ void Ines::load_rom(char* fname){
   fclose(fp);
 
 	%%write init;
-	%%write exec;
-	if(p)
-		free(p);
+	%%write exec noend;
 }
 
 void Ines::clean_up(){
-	
+	//if(p)
+		//free(p);
 }

@@ -1,0 +1,12 @@
+Below are a few notes concerning the tools used and the overall design:
+
+On Ragel:
+	-Using Ragel has been fun for specifying the 2a03 CPU and iNES files; however, it has made debugging more difficult and forced me into using threads.  Originally I planned the application to be single-threaded, but since I cannot currently figure out how to reeneter the CPU core, I have to run the core on a thread seperate from the GUI.  This may not be the end of the world, but has introduced more complexity than I would like.  Also another problem is partioning the code.  Right now the 2a03 is a monster file.
+	-I might use Ragel also for the memory mappers.
+
+On SDL:
+	-Threads: Note to remain cross-platform just about all SDL stuff (input, audio, rendering) should be in the main thread, because Win32 has problems with SDL 1.2.9 threads.
+
+
+On 2a03:
+	-The main loop for the CPU and pAPU can be found in the 2a03.rl file.  There in an event called cyclic_events, which is called after the finite state machine matches an opcode and it's arguments.

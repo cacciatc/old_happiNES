@@ -32,14 +32,14 @@ int main(int argc,char** argv){
 	Happines hap;
 	hap = Happines();
 
-	if(argc >= 2){
-		hap.load_rom(*(argv+1));
-		hap.launch_nes(DEFAULT_CORE_INDEX);
-	}
+	hap.load_rom("a_demo.nes");
+	hap.launch_nes(DEFAULT_CORE_INDEX);
 	return hap.run();
 }
 
 int run_nes_thread(void*data){
+	/*for debugging*/
+	cores[core_index].set_debug();
 	cores[core_index].run();
 	return 0;
 }

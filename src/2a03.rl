@@ -269,7 +269,7 @@
   }
 	action load_accumulator_and_x {
 		/*stores result of memory lookup*/
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
     switch(current_op){
 			case 0xA7 :
@@ -490,8 +490,8 @@
 		check_for_negative(a_register);
 	}
 	action logical_bit {
-		unsigned char temp;
-		unsigned char mem_val;
+		unsigned char temp = 0;
+		unsigned char mem_val = 0;
 		current_op = *(p-arg_count);
     switch(current_op){
 			case 0x24 :
@@ -511,7 +511,7 @@
 		}
 	}
 	action logical_and_accumulator_with_byte {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
     switch(current_op){
 			case 0x0B :
@@ -528,7 +528,7 @@
 		}
 	}
 	action logical_and_accumulator_with_x {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 		
 		temp = a_register & x_register;
@@ -604,7 +604,7 @@
 		cycles -= 2;
 	}
 	action logical_and_accumulator_with_x_store_memory {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		temp = (a_register & x_register) & 0x07;
@@ -629,7 +629,7 @@
 		cycles -= 2;
 	}
 	action logical_and_mem_with_stack_pointer {
-		unsigned char temp;		
+		unsigned char temp = 0;		
 
 		temp = read_memory(absolute_y(*p,*(p-1)));
 		temp &= pstack;
@@ -659,7 +659,7 @@
 
 	##arithmetic instructions
 	action add {
-		unsigned char temp;
+		unsigned char temp = 0;
 		unsigned char old_a = a_register;
 		current_op = *(p-arg_count);
     switch(current_op){
@@ -719,7 +719,7 @@
 		check_for_negative(a_register);
 	}
 	action subtract {
-		unsigned char temp;
+		unsigned char temp = 0;
 		unsigned char old_a = a_register;
 		current_op = *(p-arg_count);
 
@@ -787,7 +787,7 @@
 		check_for_negative(a_register);
 	}
 	action compare {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
     switch(current_op){
@@ -923,7 +923,7 @@
 		check_for_negative(a_register);
 	}
 	action compare_x {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
     switch(current_op){
@@ -979,7 +979,7 @@
 		check_for_negative(x_register);
 	}
 	action compare_y {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
     switch(current_op){
@@ -1037,7 +1037,7 @@
 
 	##increments and decrements
 	action inc {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1083,7 +1083,7 @@
 		check_for_zero(y_register);
 	}
 	action dec {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1129,7 +1129,7 @@
 		check_for_zero(y_register);
 	}
 	action dcp {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1305,7 +1305,7 @@
 
 	##shifts
 	action arithmetic_shift_left {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1379,7 +1379,7 @@
 		check_for_negative(temp);
 	}
 	action logical_shift_right {
-		unsigned char temp;
+		unsigned char temp = 0;
 		current_op = *(p-arg_count);
 
 		switch(current_op){
@@ -1453,8 +1453,8 @@
 		check_for_negative(temp);
 	}
 	action rotate_left {
-		unsigned char temp;
-		unsigned char old_carry;
+		unsigned char temp = 0;
+		unsigned char old_carry = 0;
 		
 		current_op = *(p-arg_count);
 		old_carry = get_carry_flag();
@@ -1535,8 +1535,8 @@
 		check_for_negative(temp);
 	}
 	action rotate_right {
-		unsigned char temp;
-		unsigned char old_carry;
+		unsigned char temp = 0;
+		unsigned char old_carry = 0;
 
 		current_op = *(p-arg_count);
 		old_carry = get_carry_flag();
@@ -1629,6 +1629,7 @@
 		if(p >= pe){
       fbreak;
 		}
+
 		/*if in debug mode, step through code*/
 		if(is_debug){
 			step();
@@ -1677,6 +1678,8 @@
 			p = jump_address;
 			fexec p;
 		}
+
+		/*make sure no one else is using memory*/
   }
  
   #system functions
@@ -1809,11 +1812,15 @@ CPUCore::~CPUCore(){
 
 CPUCore::CPUCore(){
 	cycles = interrupt_period = 100;
-	status    = 0;
 	arg_count = 0;
 	is_debug  = false;
 	pstack    = MY_STACK_SIZE-1;
 	is_jump_planned = 0;
+
+	a_register = 0;
+	x_register = 0;
+	y_register = 0;
+	status     = 0;
 
 	interrupt_requested = false;
 
