@@ -34,15 +34,7 @@ int main(int argc,char** argv){
 
 	//hap.load_rom("/home/cacciatc/Desktop/happiNES/Legendary Wings (U).nes");
 	hap.load_rom("/home/cacciatc/Desktop/happiNES/a_demo.nes");
-	hap.launch_nes(DEFAULT_CORE_INDEX);
 	return hap.run();
-}
-
-int run_nes_thread(void*data){
-	/*for debugging*/
-	cores[core_index].set_debug();
-	cores[core_index].run();
-	return 0;
 }
 
 /*happiNES class methods*/
@@ -64,15 +56,6 @@ Happines::Happines(){
 	/*startup GUI*/
 }
 
-void Happines::launch_nes(int index){
-	if(index >= DEFAULT_CORE_INDEX and index <= MAX_PRELOADED_ROMS){
-			/*core_index is used by run thread*/
-			core_index = index;
-			if(!thread_cores[index])
-				thread_cores[index] = SDL_CreateThread(run_nes_thread,NULL);
-	}
-}
-
 void Happines::load_recent_roms(int num){
 
 }
@@ -87,6 +70,9 @@ Happines::~Happines(){
 
 int Happines::run(){
 	while(true){
+		/*update cores*/
+		cores[0].set_debug();
+		cores[0].run();
 		/*check SDL events*/
 		while(SDL_PollEvent(&event)) {
 			 switch(event.type) {

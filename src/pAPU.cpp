@@ -26,6 +26,7 @@
 **  THE SOFTWARE.
 */
 #include "pAPU.h"
+/*TODO:  Will probably have to eventually move SDL audio stuff out to the GUI*/
 
 pAPU::pAPU(){
 	sample_rate = SAMPLE_RATE;
@@ -125,15 +126,15 @@ void pAPU::handle_write(short address){
 		/*pulse 1 fine tune*/
 		case 0x4002:
 			/*some fun logic, since prg timer is only 11 bits*/
-			sq1.prg_timer &= 0x700;
-			sq1.prg_timer |= tmp;
+			sq1.prg_timer_max &= 0x700;
+			sq1.prg_timer_max |= tmp;
 			break;
 		/*pulse 1 course tune*/
 		case 0x4003:
 			/*the three most significant bits of the timer*/
-			sq1.prg_timer &= 0xFF;
-			sq1.prg_timer |= (tmp&07);
-			/*length counter? what is it*/
+			sq1.prg_timer_max &= 0xFF;
+			sq1.prg_timer_max |= (tmp&07);
+			sq1.length_counter = tmp<<3;
 			break;
 		case 0x4017:
 			/*IRQ's enabled?*/
@@ -206,7 +207,9 @@ void pAPU::reset(){
 	frame_counter  = 4;
 	frame_divider  = 4;
 	frame_irq_freq = 60;
+	master_frame_counter = 0;
 	frame_irq_enabled = true;
+	frame_irq_active = false;
 
 	/*reset square 1*/
 	sq1.is_enabled = false;
@@ -220,8 +223,10 @@ void pAPU::reset(){
 	sq1.envelope_decay_rate = 0;
 	sq1.right_shift_amt = 0;
 	sq1.sweep_update_rate = 0;
-	sq1.prg_timer = 0;
+	sq1.prg_timer_max = 0;
+	sq1.prg_timer_cur = 0;
 	sq1.length_counter = 0;
+	sq1.sq_table_count = 0;
 
 	/*reset square 2*/
 	/*reset triangle*/
@@ -233,17 +238,23 @@ void pAPU::set_audio_channels(int num){
 	num_audio_channels = num;
 }
 
-void pAPU::update_frame(int cycles){
-	/*Although, the sound specs say if $4017.7 == 0 then the series should be 4,0,1,2,3,0,1,2,3...*/
-	/*most emulators seems to only worry about the $4017.7 == 1 case*/
-	frame_counter = (frame_counter+1) % 4;
+void pAPU::tick_frame(){
+	frame_irq_active = false;
+	/*currently only implementing NTSC*/
+	if(frame_counter++ >= 5)
+			frame_counter = 0;
+
+	/*done on every tick*/
+	sq1.update_envelope_decay();
 	switch(frame_counter){
 		case 0:
 			/*clock linear and envelope decay*/
+			
 			break;
 		case 1:
-			/*clock linear and envelope decay*/
+			sq1.update_length_counter();
 			/*update freq sweep and length counters*/
+			sq1.update_sweep();
 			break;
 		case 2:
 			/*clock linear and envelope decay*/
@@ -251,15 +262,56 @@ void pAPU::update_frame(int cycles){
 		case 3:
 			/*clock linear and envelope decay*/
 			/*update freq sweep and length counters*/
+			sq1.update_length_counter();
+			sq1.update_sweep();
+
+			if(frame_irq_enabled)
+				frame_irq_active = true;
+			break;
+		case 4:
 			break;
 		default:break;
 	}
-	/*update square 1*/
-	/*update square 2*/
-	/*update triangle*/
-	/*update noise*/
-	/*update dmc*/
+
+}
+
+void pAPU::sample_channels(int cycles){
+	int sq1_sample;
+
+	sq1_sample = sq1.sample_value*cycles;
+/*start here looking at sampletimer in java code and when and when not to sample*/
+}
+
+void pAPU::update_frame(int cycles){
 	
+	/*determine how many cycles to emulate, although we cannot go past the next sampling*/
+
+	/*update dmc*/
+	/*update triangle*/
+
+	/*update square 1*/
+	sq1.prg_timer_max -= cycles;
+	if(sq1.prg_timer_max <= 0){
+		/*update the prg timer, I believe it is half the value because the pAPU is clocked twice as fast as the CPU*/
+		sq1.prg_timer_cur += (sq1.prg_timer_max+1)/2;
+		/*increase index in loop up table, with wrap-around*/
+		sq1.sq_table_count = (sq1.sq_table_count+1)%8;
+		/*update the sample for this cycle*/
+		sq1.update_sample();
+	}
+
+	/*update square 2*/
+	/*update noise*/
+
+	/*now has enough CPU cycles elapsed in order to update a frame?*/
+	master_frame_counter += FRAME_TIME/2;
+	if(master_frame_counter >= FRAME_TIME){
+		master_frame_counter -= FRAME_TIME;
+		tick_frame();
+	}
+	
+	sample_channels(cycles);
+
 	/*mix*/
 	/*output*/
 }

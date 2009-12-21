@@ -58,7 +58,9 @@
   }
 	action get_ctrl_2{
 		map_type += (*p)>>4;
+		vs_system = (*p) & (1<<0) ? false : true;
 	}
+	#TODO : where to find vs_system info
   action get_vs_system{
     vs_system = (*p) & (1<<0) ? false : true;
   }
@@ -94,7 +96,7 @@
   chr_size        = extend @get_chr_size;
   ctrl_1          = extend @get_ctrl_1;
 	ctrl_2          = extend @get_ctrl_2;
-  vs_syste        = extend @get_vs_system;
+  #vs_syste        = extend @get_vs_system;
   ram_size        = extend @get_ram_size;
   disp_info       = 0..1  @get_disp_info;
   header_end      = 0 {6};
@@ -109,7 +111,7 @@
     ),
     
     Header: (
-      prg_size . chr_size . ctrl_1 . ctrl_2 .vs_syste . ram_size . disp_info . header_end -> Prg
+      prg_size . chr_size . ctrl_1  . ctrl_2 . ram_size . disp_info . header_end -> Prg
     ),
     
     Prg: (

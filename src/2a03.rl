@@ -1654,6 +1654,8 @@
     				schedule_jump(NMI-ROM_START);
 						break;
 					case IRQ:
+						if(get_interrupt_disable_flag())
+							break;
  						/*load interrupt vector*/
     				schedule_jump(IRQ-ROM_START);
 						break;
@@ -1666,9 +1668,14 @@
       cycles += interrupt_period;
     }
 
-		//emulate sound
+		/*emulate sound*/
 		papu.update_frame(cycles);
-		//emulate ppu
+		/*check if it generated an IRQ*/
+		if(papu.is_frame_irq_active() && !get_interrupt_disable_flag()){
+    		request_interrupt(IRQ);
+		}
+		
+		/*emulate ppu*/
 
 		/*note the jump code is here so that debugging dumps are easier to read.*/
 		/*perform any scheduled jumps*/
@@ -1678,7 +1685,8 @@
 			fexec p;
 		}
 
-		/*make sure no one else is using memory*/
+		/*kick back to happiNES main*/
+		fbreak;
   }
  
   #system functions

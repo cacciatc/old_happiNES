@@ -34,6 +34,7 @@
 #define STEREO 2
 #define SAMPLE_RATE 44100
 #define SOUND_BUFFER_SIZE 2048
+#define FRAME_TIME 14915
 
 /*used in the square channels*/
 const int duty_cycle_lookup_table[] = {
@@ -66,7 +67,12 @@ struct Square1_Channel : Channel {
 	/*a timer used to silence a channel*/
 	int length_counter;
 	/*11 bit timer*/
-	int prg_timer;
+	int prg_timer_max;
+	int prg_timer_cur;
+	/*used to lookup square function values in lookup table*/
+	int sq_table_count;
+	/*value from lookup table with sweep and decay incorporated*/
+	int sample_value;
 
 	/*SDL sound specific*/
 	unsigned char* raw_sample;
@@ -87,8 +93,16 @@ struct Square1_Channel : Channel {
 	void update_envelope_decay(){
 
 	}
-	void update_sample(){
+	int update_sample(){
+		/*since there are eight values per type within the duty cycle table*/
+		int duty_cycle_start_index = duty_cycle_type*8;
 
+		if(is_enabled && length_counter > 0 && prg_timer_max > 0x7){
+			/*TODO: sweep code?*/
+			sample_value = volume*duty_cycle_lookup_table[(duty_cycle_start_index)+sq_table_count];
+		}
+		else
+			sample_value = 0;
 	}
 };
 
@@ -105,7 +119,10 @@ class pAPU {
 		int frame_counter;
 		int frame_divider;
 		int frame_irq_freq;
+		int master_frame_counter;
+
 		bool frame_irq_enabled;
+		bool frame_irq_active;
 
 		/*ptr to CPU memory*/
 		unsigned char *cpu_memory;
@@ -145,8 +162,14 @@ class pAPU {
 		/*called in CPU's main loop*/
 		void update_frame(int cycles);
 
-	private:
+		void sample_channels(int cycles);
 
+		bool is_frame_irq_active(){
+			return frame_irq_active;
+		}
+
+	private:
+		void tick_frame();
 		/*channel enable/disable*/
 		void enable_square2();
 		void disable_square2();

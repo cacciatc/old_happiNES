@@ -34,15 +34,6 @@
 /*Index to the default core*/
 #define DEFAULT_CORE_INDEX 0
 
-/*these variables are made global for threading */
-int core_index;
-/*cores for showing recently played ROMS and the default*/		
-CPUCore cores[MAX_PRELOADED_ROMS];
-/*accompanying threads for each core*/
-SDL_Thread* thread_cores[MAX_PRELOADED_ROMS];
-/*accompanying mutexes for each core (reading memory)*/
-SDL_mutex* core_mutexes[MAX_PRELOADED_ROMS];
-
 int run_nes_thread(void*data);
 
 class Happines{
@@ -51,6 +42,11 @@ class Happines{
 		SDL_Surface *screen;	
 		/*used for window*/
   	SDL_Event event;
+		
+		/*CPUCore index*/
+		int core_index;
+		/*cores for showing recently played ROMS and the default*/		
+		CPUCore cores[MAX_PRELOADED_ROMS];
 
 	public:
 		Happines();
@@ -59,8 +55,6 @@ class Happines{
 		void load_rom(char* fname);
 		/*starts the main processing loop*/
 		int run();
-		/*used to launch a nes core*/
-		void launch_nes(int index);
 
 	private:
 		/*handles keyboard input*/
