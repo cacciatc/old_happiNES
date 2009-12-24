@@ -1641,7 +1641,7 @@
 
 		/*probably time for an interrupt*/
     if(cycles <= 0){
-			/*any requested?, note the BRK cmd is handled elsewhere, might be advantageous to have it handled here too though*/
+			/*any requested?, note the BRK cmd is handled elsewhere, might be advantageous to have it handled here too though?*/
 			if(interrupt_requested){			
 				/*push program counter and status*/
     		push(p-m-ROM_START+1);
@@ -1649,6 +1649,10 @@
  				set_interrupt_disable_flag();
 				/*TODO: add memory mapper here!*/
 				switch(interrupt_type){
+					case RES:
+						 /*load interrupt vector*/
+    				schedule_jump(RES-ROM_START);
+						break;
 					case NMI:
 						 /*load interrupt vector*/
     				schedule_jump(NMI-ROM_START);
@@ -1659,10 +1663,7 @@
  						/*load interrupt vector*/
     				schedule_jump(IRQ-ROM_START);
 						break;
-					case RES:
-						 /*load interrupt vector*/
-    				schedule_jump(RES-ROM_START);
-						break;
+					
 				}
 			}
       cycles += interrupt_period;
@@ -1675,7 +1676,12 @@
     		request_interrupt(IRQ);
 		}
 		
-		/*emulate ppu*/
+		/*emulate graphics*/
+		ppu.update(cycles);
+		/*happens 50-60 times a second*/
+		if(ppu.is_nmi_vblank_active()){
+			request_interrupt(NMI);
+		}
 
 		/*note the jump code is here so that debugging dumps are easier to read.*/
 		/*perform any scheduled jumps*/
@@ -1685,8 +1691,10 @@
 			fexec p;
 		}
 
-		/*kick back to happiNES main*/
-		fbreak;
+		/*kick back to happiNES main unless running debug code...for now at least*/
+		#if DEBUG
+			fbreak;
+		#endif
   }
  
   #system functions
@@ -1835,6 +1843,10 @@ CPUCore::CPUCore(){
 	papu = pAPU();
 	papu.setup_memory(m);
 	papu.initialize_sound();
+
+	/*create PPU*/
+	ppu = PPU();
+	ppu.setup_memory(m);
 
 	%%write init;
 }

@@ -31,6 +31,7 @@
 #include <string.h>
 #include "ines.h"
 #include "pAPU.h"
+#include "PPU.h"
 
 /*used in calculating cycles*/
 #define PAGE_SIZE     256
@@ -47,6 +48,10 @@
 #define NMI 0xFFFA
 #define RES 0xFFFC
 #define IRQ 0xFFFE
+
+/*type of NES*/
+#define PAL  1
+#define NTSC 2
 
 /*motherboard clocks (MHz)*/
 #define PAL_CLOCK  26.601171
@@ -100,7 +105,7 @@ class CPUCore {
 		int interrupt_period;
 
 		/*info on interrupts*/
-		/*NMI, IRG, and RES*/
+		/*NMI, IRQ, and RES*/
 		int interrupt_type;
 		bool interrupt_requested;
 
@@ -116,7 +121,9 @@ class CPUCore {
 
 		/*pAPU chip*/
 		pAPU papu;
-
+		/*picture processing chip*/
+		PPU ppu;
+	
 		public:
 		CPUCore();
 		~CPUCore();
@@ -163,6 +170,9 @@ class CPUCore {
 		int read_memory(short address){
 			if(address == 0x4015)
 				return papu.handle_read(address);
+			else if(address == 0x2007 || address == 0x2002){
+				return ppu.handle_read(address);
+			}
 			else
   			return m[address];
 		}
@@ -176,6 +186,7 @@ class CPUCore {
 			}
 			/*PPU I/O*/
 			else if(address >= 0x2000 && address <= 0x2007){
+				ppu.handle_write(address);
 				for(int i=0x2008;i<0x4000;i+=8){
 					m[address+i] = value;
 				}

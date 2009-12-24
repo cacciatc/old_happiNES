@@ -21,15 +21,18 @@ $(src_path)ines.o : $(src_path)ines.rl $(src_path)ines.h
 $(src_path)pAPU.o : $(src_path)pAPU.cpp $(src_path)pAPU.h
 	$(compiler) -c -g $(src_path)pAPU.cpp $(sdl_comp_flags)
 
-$(src_path)2a03.o : $(src_path)2a03.rl $(src_path)2a03.h $(src_path)ines.o $(src_path)pAPU.o
+$(src_path)PPU.o : $(src_path)PPU.cpp $(src_path)PPU.h
+	$(compiler) -c -g $(src_path)PPU.cpp $(sdl_comp_flags)
+
+$(src_path)2a03.o : $(src_path)2a03.rl $(src_path)2a03.h $(src_path)ines.o $(src_path)pAPU.o $(src_path)PPU.o
 	$(fs_compiler) $(src_path)2a03.rl
 	$(compiler) -c -g $(src_path)2a03.c -I $(sdl_inc) -I $(sdl_mixer_inc)
 
 happiNES : $(src_path)happiNES.cpp $(src_path)happiNES.h $(src_path)2a03.o
-	$(compiler) -g $(src_path)happiNES.cpp $(src_path)2a03.o $(src_path)ines.o $(src_path)pAPU.o $(sdl_comp_flags) -o ../happiNES
+	$(compiler) -g $(src_path)happiNES.cpp $(src_path)2a03.o $(src_path)ines.o $(src_path)pAPU.o $(src_path)PPU.o $(sdl_comp_flags) -o ../happiNES
 
 test_instructions : $(src_path)2a03.o $(src_path)cpu_instruction_test.cpp
-	$(compiler) $(src_path)2a03.o $(src_path)ines.o $(src_path)pAPU.o $(src_path)cpu_instruction_test.cpp -o ../2a03 $(sdl_comp_flags)
+	$(compiler) $(src_path)2a03.o $(src_path)ines.o $(src_path)pAPU.o $(src_path)PPU.o $(src_path)cpu_instruction_test.cpp -o ../2a03 $(sdl_comp_flags)
 
 clean :
 	rm *.o
