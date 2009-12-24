@@ -1,4 +1,3 @@
-#NOTE: for each test, there are generally 3 assertions: normal, test for negative flag, and test for zero flag
 require 'test/unit'
 
 class XASTest < Test::Unit::TestCase
