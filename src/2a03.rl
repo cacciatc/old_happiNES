@@ -1639,41 +1639,37 @@
   		printf("\n");
 		}
 
-		/*probably time for an interrupt*/
-    if(cycles <= 0){
-			/*any requested?, note the BRK cmd is handled elsewhere, might be advantageous to have it handled here too though?*/
-			if(interrupt_requested){			
-				/*push program counter and status*/
-    		push(p-m-ROM_START+1);
-    		push(status);
- 				set_interrupt_disable_flag();
-				/*TODO: add memory mapper here!*/
-				switch(interrupt_type){
-					case RES:
-						 /*load interrupt vector*/
-    				schedule_jump(RES-ROM_START);
+		/*any requested?, note the BRK cmd is handled elsewhere, might be advantageous to have it handled here too though?*/
+		if(interrupt_requested){			
+			/*push program counter and status*/
+    	push(p-m-ROM_START+1);
+    	push(status);
+ 			set_interrupt_disable_flag();
+			/*TODO: add memory mapper here!*/
+			switch(interrupt_type){
+				case RES:
+					 /*load interrupt vector*/
+    			schedule_jump(RES-ROM_START);
+					break;
+				case NMI:
+					 /*load interrupt vector*/
+    			schedule_jump(NMI-ROM_START);
+					break;
+				case IRQ:
+					if(get_interrupt_disable_flag())
 						break;
-					case NMI:
-						 /*load interrupt vector*/
-    				schedule_jump(NMI-ROM_START);
-						break;
-					case IRQ:
-						if(get_interrupt_disable_flag())
-							break;
- 						/*load interrupt vector*/
-    				schedule_jump(IRQ-ROM_START);
-						break;
-					
-				}
+ 					/*load interrupt vector*/
+    			schedule_jump(IRQ-ROM_START);
+					break;
 			}
-      cycles += interrupt_period;
+			interrupt_requested = false;
     }
 
 		/*emulate sound*/
 		papu.update_frame(cycles);
 		/*check if it generated an IRQ*/
 		if(papu.is_frame_irq_active() && !get_interrupt_disable_flag()){
-    		request_interrupt(IRQ);
+    	request_interrupt(IRQ);
 		}
 		
 		/*emulate graphics*/
@@ -1691,8 +1687,8 @@
 			fexec p;
 		}
 
-		/*kick back to happiNES main unless running debug code...for now at least*/
-		#if DEBUG
+		/*kick back to happiNES main, note to run test instruction code, then the -DHAP_DEBUG flag must be removed from the makefile*/
+		#ifdef HAP_DEBUG
 			fbreak;
 		#endif
   }
@@ -1848,11 +1844,22 @@ CPUCore::CPUCore(){
 	ppu = PPU();
 	ppu.setup_memory(m);
 
+	/*default type used is NTSC*/
+	set_type(NTSC);
+
 	%%write init;
 }
 
 void CPUCore::run(){
 	%%write exec noend;
+}
+
+void CPUCore::run_for(int milliseconds){
+	int cycles_per_milli = (((nes_type == PAL) ? PAL_CLOCK : NTSC_CLOCK)*1000.0)*milliseconds;
+	while(cycles_per_milli + cycles >= 0){
+		%%write exec noend;
+	}
+	cycles = 0;
 }
 
 void CPUCore::step(){

@@ -54,6 +54,7 @@ Happines::Happines(){
 	load_recent_roms(MAX_PRELOADED_ROMS);
 
 	/*startup GUI*/
+
 }
 
 void Happines::load_recent_roms(int num){
@@ -62,6 +63,7 @@ void Happines::load_recent_roms(int num){
 
 void Happines::load_rom(char* fname){
 	cores[core_index].load_ines(fname);
+	cores[core_index].set_debug();
 }
 
 Happines::~Happines(){
@@ -69,10 +71,20 @@ Happines::~Happines(){
 }
 
 int Happines::run(){
+	last_ntsc_tick = last_pal_tick = SDL_GetTicks();
 	while(true){
-		/*update cores*/
-		cores[0].set_debug();
-		cores[0].run();
+		next_pal_tick = next_ntsc_tick = SDL_GetTicks();
+		/*see how much time has passed and update cycles*/
+		if(cores[0].get_type() == NTSC && next_ntsc_tick-last_ntsc_tick > 0){
+			cores[0].run_for(next_ntsc_tick-last_ntsc_tick);
+			last_ntsc_tick = SDL_GetTicks();
+		}
+		/*what about a PAL one?*/
+		if(cores[0].get_type() == PAL && next_pal_tick-last_pal_tick > 0){
+			cores[0].run_for(next_pal_tick-last_pal_tick);
+			last_pal_tick = next_pal_tick;
+		}
+
 		/*check SDL events*/
 		while(SDL_PollEvent(&event)) {
 			 switch(event.type) {

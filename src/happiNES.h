@@ -43,15 +43,20 @@ class Happines{
 		/*used for window*/
   	SDL_Event event;
 		
-		/*CPUCore index*/
+		/*CPUCore index, the core that is being processed currently*/
 		int core_index;
 		/*cores for showing recently played ROMS and the default*/		
 		CPUCore cores[MAX_PRELOADED_ROMS];
+		/*at the moment all CPU's are clocked the same, in the future might possible decouple the clocking*/
+		unsigned int last_ntsc_tick;
+		unsigned int next_ntsc_tick;
+		unsigned int last_pal_tick;
+		unsigned int next_pal_tick;
 
 	public:
 		Happines();
 		~Happines();
-		/*loads a rom*/
+		/*loads a rom, currently only iNES*/
 		void load_rom(char* fname);
 		/*starts the main processing loop*/
 		int run();

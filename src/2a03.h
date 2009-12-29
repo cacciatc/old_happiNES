@@ -116,6 +116,9 @@ class CPUCore {
 		/*used to determine if debugging*/
 		int is_debug;
 
+		/*used for timing, PAL or NTSC*/
+		int nes_type;
+
 		/*holds current ROM info*/
 		Ines rom;
 
@@ -129,6 +132,8 @@ class CPUCore {
 		~CPUCore();
 		/*run current ROM*/
 		void run();
+		/*run current ROM for so many milliseconds*/
+		void run_for(int milliseconds);
 
 		/*loads an INES rom*/
 		void load_ines(char* fname);
@@ -147,6 +152,12 @@ class CPUCore {
 
 		/*used to request an interrupt*/
 		void request_interrupt(int type);
+
+		/*sets type of NES, PAL or NTSC*/
+		void set_type(int type){
+			nes_type = type;
+		}
+		int get_type(){return nes_type;}
 
 		/*used to share memory with pAPU*/
 		void get_memory(unsigned char*n){
