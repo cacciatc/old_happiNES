@@ -25,36 +25,55 @@
 **  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 **  THE SOFTWARE.
 */
-#define NTSC_FRAMES_PER_SECOND 60
-#define PAL_FRAMES_PER_SECOND  50
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "../src/2a03.h"
 
-class PPU{
-	private:
-	/*map to CPU memory*/
-	unsigned char* cpu_memory;
-	/*used to send a vblank to the CPU*/
-	bool req_vblank;
+/*packs up memory and registers, etc*/
+void pack_it(char* fname,CPUCore_dump* core){
+	int i,j;
+	FILE* fp = fopen(fname,"w+");
+	if(!fp){
+		printf("Unable to open dump file.\n");
+		exit(1);
+	}
+	fprintf(fp,"%.2X\n",core->a_register);
+	fprintf(fp,"%.2X\n",core->x_register);
+	fprintf(fp,"%.2X\n",core->y_register);
+	fprintf(fp,"%.2X\n",core->status);
+	fprintf(fp,"%.2X\n",core->pstack);
+	fprintf(fp,"%.2X\n",core->m[core->pstack+STACK_OFFSET+1]);
 
-	public:
-	PPU();
-	~PPU();
+	for(i = STACK_OFFSET+MY_STACK_SIZE-1;i >= STACK_OFFSET;i--){
+		fprintf(fp,"%.2X\n",core->m[i]);
+	}
+
+  for(i = 0;i<PAGE_SIZE;i+=16){
+		fprintf(fp,"[%.4X-%.4X]",i,i+15);
+		for(j = 0; j < 15; j++){
+			fprintf(fp," %.2X",core->m[j+(i*15)]);
+		}
+		fprintf(fp,"\n");
+  }
+	fclose(fp);
+}
+
+int main(int argc,char** argv){
+	if(argc > 2){
+		/*init*/
+		CPUCore cpu;
+		CPUCore_dump core;
+
+		cpu = CPUCore();
 	
-	/*called when CPU memory mapped to the pAPU is written to*/
-	void handle_write(short address);
-
-	/*called when CPU memory mapped to pAPU is read from*/
-	int handle_read(short address);
-
-	/*gives PPU access to CPU memory, must be called before running PPU*/
-	void setup_memory(unsigned char* m);
-
-	/**/
-	void update(int cycles){
-		req_vblank = false;
-		
+		cpu.load_debug_code(argv[1]);
+		cpu.run();
+		cpu.dump_core(&core);
+		pack_it(argv[2],&core);
 	}
-	bool is_nmi_vblank_active(){
-		return req_vblank;
-	}
-};
+	return 0;
+}
+
+

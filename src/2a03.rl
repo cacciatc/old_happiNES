@@ -1669,6 +1669,7 @@
 		papu.update_frame(cycles);
 		/*check if it generated an IRQ*/
 		if(papu.is_frame_irq_active() && !get_interrupt_disable_flag()){
+			puts("sound reqd an interrupt!");
     	request_interrupt(IRQ);
 		}
 		
@@ -1676,6 +1677,7 @@
 		ppu.update(cycles);
 		/*happens 50-60 times a second*/
 		if(ppu.is_nmi_vblank_active()){
+			puts("gfx reqd an interrupt!");
 			request_interrupt(NMI);
 		}
 
@@ -1686,11 +1688,8 @@
 			p = jump_address;
 			fexec p;
 		}
-
-		/*kick back to happiNES main, note to run test instruction code, then the -DHAP_DEBUG flag must be removed from the makefile*/
-		#ifdef HAP_DEBUG
-			fbreak;
-		#endif
+		/*kick back control*/
+		fbreak;
   }
  
   #system functions
@@ -1851,7 +1850,9 @@ CPUCore::CPUCore(){
 }
 
 void CPUCore::run(){
-	%%write exec noend;
+	while(p < pe){
+		%%write exec noend;
+	}
 }
 
 void CPUCore::run_for(int milliseconds){

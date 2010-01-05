@@ -208,7 +208,7 @@ void pAPU::reset(){
 	frame_divider  = 4;
 	frame_irq_freq = 60;
 	master_frame_counter = 0;
-	frame_irq_enabled = true;
+	frame_irq_enabled = false;
 	frame_irq_active = false;
 
 	/*reset square 1*/
